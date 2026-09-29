@@ -32,6 +32,7 @@ func main() {
 	go hub.Run()
 
 	go workers.StartDoneTicker(ctx, store, hub, 10*time.Second)
+	go workers.StartDevicePingTicker(ctx, store, 30*time.Second)
 
 	rfidSrv := tcp.New(":5000", store, hub)
 	go func() {

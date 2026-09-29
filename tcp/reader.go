@@ -22,6 +22,10 @@ const (
 	MagicByte  byte  = 0xAA
 	HeaderSize int   = 48
 	MaxSkew    int64 = 5 // seconds
+
+	// Responses
+	AckOK     = 0x01
+	AckFailed = 0xFF
 )
 
 type Server struct {
@@ -121,6 +125,7 @@ func (s *Server) processPacket(conn net.Conn) error {
 
 	dev, err := s.store.FindDeviceByID(ctx, int(readerID))
 	if err != nil {
+		conn.Write([]byte{AckFailed})
 		return fmt.Errorf("reader %d not in allowed devices: %w", readerID, err)
 	}
 
@@ -142,6 +147,8 @@ func (s *Server) processPacket(conn net.Conn) error {
 	if !hmac.Equal(mac.Sum(nil), devHash) {
 		return errors.New("invalid hmac hash")
 	}
+
+	conn.Write([]byte{AckOK})
 
 	return s.handleScan(ctx, hex.EncodeToString(uid), timestamp)
 }
