@@ -245,8 +245,10 @@ func (rs devicesResource) Pair(w http.ResponseWriter, r *http.Request) {
 	}
 
 	dev := db.Device{
-		Name:    devEntry.ServiceRecord.Instance,
-		MacAddr: txt[1],
+		Name:     devEntry.ServiceRecord.Instance,
+		MacAddr:  txt[1],
+		IPv4Addr: devEntry.AddrIPv4[0].To4().String(),
+		Online:   true,
 	}
 
 	if err := dev.Validate(); err != nil {

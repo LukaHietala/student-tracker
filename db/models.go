@@ -77,6 +77,8 @@ type Device struct {
 	Name      string `json:"name"`
 	MacAddr   string `json:"mac_addr"`
 	SecretKey string `json:"secret_key"`
+	IPv4Addr  string `json:"ipv4_addr"`
+	Online    bool   `json:"online"`
 }
 
 type Scan struct {
@@ -119,6 +121,10 @@ func (d *Device) Validate() error {
 
 	if d.MacAddr == "" {
 		return errors.New("missing device mac address")
+	}
+
+	if d.IPv4Addr == "" {
+		return errors.New("missing device ipv4 address")
 	}
 
 	return nil

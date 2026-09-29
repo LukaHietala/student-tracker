@@ -33,7 +33,9 @@ var schema = `
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name TEXT NOT NULL,
 		mac_addr TEXT NOT NULL,
-		secret_key TEXT NOT NULL
+		secret_key TEXT NOT NULL,
+		ipv4_addr TEXT NOT NULL,
+		is_online BOOL NOT NULL DEFAULT FALSE
 	);
 `
 
