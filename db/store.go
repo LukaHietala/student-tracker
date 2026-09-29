@@ -32,6 +32,7 @@ var schema = `
 	CREATE TABLE IF NOT EXISTS devices (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name TEXT NOT NULL,
+		mac_addr TEXT NOT NULL,
 		secret_key TEXT NOT NULL
 	);
 `

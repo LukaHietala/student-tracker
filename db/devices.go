@@ -9,12 +9,12 @@ import (
 
 func (s *Store) AddDevice(ctx context.Context, device *Device) error {
 	query := `
-        INSERT INTO devices (name, secret_key)
-        VALUES (?,?)
+        INSERT INTO devices (name, mac_addr, secret_key)
+        VALUES (?,?,?)
     `
 
 	secret := randomKey(12)
-	res, err := s.db.ExecContext(ctx, query, device.Name, secret)
+	res, err := s.db.ExecContext(ctx, query, device.Name, device.MacAddr, secret)
 	if err != nil {
 		return err
 	}
@@ -31,7 +31,7 @@ func (s *Store) AddDevice(ctx context.Context, device *Device) error {
 
 func (s *Store) ListDevices(ctx context.Context) ([]*Device, error) {
 	query := `
-		SELECT id, name, secret_key
+		SELECT id, name, mac_addr, secret_key
 		FROM devices
 	`
 
@@ -44,7 +44,7 @@ func (s *Store) ListDevices(ctx context.Context) ([]*Device, error) {
 	devices := make([]*Device, 0)
 	for rows.Next() {
 		dev := &Device{}
-		err := rows.Scan(&dev.ID, &dev.Name, &dev.SecretKey)
+		err := rows.Scan(&dev.ID, &dev.Name, &dev.MacAddr, &dev.SecretKey)
 		if err != nil {
 			return nil, err
 		}
@@ -56,12 +56,12 @@ func (s *Store) ListDevices(ctx context.Context) ([]*Device, error) {
 
 func (s *Store) FindDeviceByID(ctx context.Context, id int) (*Device, error) {
 	query := `
-		SELECT id, name, secret_key
+		SELECT id, name, mac_addr, secret_key
 		FROM devices
 		WHERE id = ? LIMIT 1`
 
 	var dev Device
-	err := s.db.QueryRowContext(ctx, query, id).Scan(&dev.ID, &dev.Name, &dev.SecretKey)
+	err := s.db.QueryRowContext(ctx, query, id).Scan(&dev.ID, &dev.Name, &dev.MacAddr, &dev.SecretKey)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, fmt.Errorf("no device found based on id: %d", id)

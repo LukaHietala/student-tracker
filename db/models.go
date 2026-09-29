@@ -75,6 +75,7 @@ func (s Schedule) Value() (driver.Value, error) {
 type Device struct {
 	ID        int    `json:"id"`
 	Name      string `json:"name"`
+	MacAddr   string `json:"mac_addr"`
 	SecretKey string `json:"secret_key"`
 }
 
@@ -112,12 +113,12 @@ func (d *Device) Validate() error {
 		return errors.New("missing device name")
 	}
 
-	if d.SecretKey == "" {
-		return errors.New("missing secret key")
-	}
-
 	if len(d.Name) < 1 || len(d.Name) > 255 {
 		return errors.New("invalid device name length, valid range is 1-255")
+	}
+
+	if d.MacAddr == "" {
+		return errors.New("missing device mac address")
 	}
 
 	return nil

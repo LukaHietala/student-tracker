@@ -85,7 +85,7 @@ func ErrInvalidRequest(err error) render.Renderer {
 }
 
 func ErrInternal(err error) render.Renderer {
-	log.Println("error:", err)
+	log.Println("internal error:", err)
 	return &ErrResponse{
 		HTTPStatusCode: http.StatusInternalServerError,
 		ErrorText:      http.StatusText(http.StatusInternalServerError),
