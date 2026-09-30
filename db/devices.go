@@ -78,7 +78,7 @@ func (s *Store) UpdateDevice(ctx context.Context, id int, device Device) error {
         UPDATE devices
 		SET name = ?,
    			secret_key = ?,
-			online = ?
+			is_online = ?
 		WHERE id = ?
     `
 	_, err := s.db.ExecContext(ctx, query, device.Name, device.SecretKey, device.Online, id)

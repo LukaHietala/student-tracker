@@ -25,6 +25,11 @@ func (rs groupsResource) Routes() chi.Router {
 		r.Get("/", rs.FindOne)
 		r.Put("/", rs.Update)
 		r.Delete("/", rs.Archive)
+		r.Route("/students", func(r chi.Router) {
+			r.Get("/", rs.ListGroupStudents)
+			r.Get("/archived", rs.ListArchivedGroupStudents)
+			r.Post("/", rs.CreateGroupStudent)
+		})
 	})
 
 	r.Route("/archive", func(r chi.Router) {

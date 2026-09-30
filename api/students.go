@@ -19,9 +19,8 @@ func (rs studentsResource) Routes() chi.Router {
 	r := chi.NewRouter()
 
 	r.Get("/", rs.List)
-	r.Post("/", rs.Create)
 	r.Route("/{id}", func(r chi.Router) {
-		r.Use(rs.UserCtx)
+		r.Use(rs.StudentCtx)
 		r.Get("/", rs.FindOne)
 		r.Put("/", rs.Update)
 		r.Delete("/", rs.Archive)
@@ -30,7 +29,7 @@ func (rs studentsResource) Routes() chi.Router {
 	r.Route("/archive", func(r chi.Router) {
 		r.Get("/", rs.ListArchived)
 		r.Route("/{id}", func(r chi.Router) {
-			r.Use(rs.UserCtx)
+			r.Use(rs.StudentCtx)
 			r.Delete("/", rs.Delete)
 		})
 	})
@@ -38,7 +37,7 @@ func (rs studentsResource) Routes() chi.Router {
 	return r
 }
 
-func (rs studentsResource) UserCtx(next http.Handler) http.Handler {
+func (rs studentsResource) StudentCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var student *db.Student
 		var err error
@@ -73,42 +72,6 @@ func (rs studentsResource) List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	render.JSON(w, r, students)
-}
-
-func (rs studentsResource) Create(w http.ResponseWriter, r *http.Request) {
-	var s db.Student
-	if err := render.Decode(r, &s); err != nil {
-		render.Render(w, r, ErrInvalidRequest(errors.New("invalid json payload")))
-		return
-	}
-
-	if s.Status == "" {
-		s.Status = "OUT"
-	}
-
-	if err := s.Validate(); err != nil {
-		render.Render(w, r, ErrInvalidRequest(err))
-		return
-	}
-
-	if err := store.AddStudent(r.Context(), &s); err != nil {
-		render.Render(w, r, ErrInternal(err))
-		return
-	}
-
-	bytes, err := json.Marshal(s)
-	if err != nil {
-		render.Render(w, r, ErrInternal(err))
-		return
-	}
-
-	hub.Broadcast(websockets.Event{
-		Event:   "student:new",
-		Payload: bytes,
-	})
-
-	render.Status(r, http.StatusCreated)
-	render.JSON(w, r, s)
 }
 
 func (rs studentsResource) FindOne(w http.ResponseWriter, r *http.Request) {

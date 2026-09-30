@@ -70,22 +70,21 @@ func StartDevicePingTicker(ctx context.Context, store *db.Store, interval time.D
 			for _, dev := range devices {
 				addr := dev.IPv4Addr + ":8080"
 				conn, err := net.DialTimeout("tcp", addr, 2*time.Second)
-				if err != nil {
-					dev.Online = false
-				} else {
-					dev.Online = true
-				}
 
-				conn.Write([]byte{ackPing})
+				if err == nil {
+					conn.Write([]byte{ackPing})
 
-				var ack [1]byte
-				if _, err := io.ReadFull(conn, ack[:]); err != nil {
-					dev.Online = false
-					log.Println("error reading device ping response:", err)
-				}
+					var ack [1]byte
+					if _, err := io.ReadFull(conn, ack[:]); err != nil {
+						dev.Online = false
+						log.Println("error reading device ping response:", err)
+					}
 
-				if ack[0] == ackPong {
-					dev.Online = true
+					if ack[0] == ackPong {
+						dev.Online = true
+					} else {
+						dev.Online = false
+					}
 				} else {
 					dev.Online = false
 				}
