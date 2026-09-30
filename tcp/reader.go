@@ -179,6 +179,7 @@ func (s *Server) handleScan(ctx context.Context, uidStr string, timestamp int64)
 	scan := &db.Scan{
 		UID:       uidStr,
 		StudentID: student.ID,
+		GroupID:   student.GroupID,
 		Timestamp: time.Unix(timestamp, 0).Format(time.DateTime),
 	}
 	if err := s.store.NewScan(ctx, scan); err != nil {

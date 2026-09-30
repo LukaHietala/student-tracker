@@ -13,15 +13,15 @@ import (
 	"github.com/lukahietala/rfid/websockets"
 )
 
-type studentsResource struct{}
+type groupsResource struct{}
 
-func (rs studentsResource) Routes() chi.Router {
+func (rs groupsResource) Routes() chi.Router {
 	r := chi.NewRouter()
 
 	r.Get("/", rs.List)
 	r.Post("/", rs.Create)
 	r.Route("/{id}", func(r chi.Router) {
-		r.Use(rs.UserCtx)
+		r.Use(rs.GroupCtx)
 		r.Get("/", rs.FindOne)
 		r.Put("/", rs.Update)
 		r.Delete("/", rs.Archive)
@@ -30,7 +30,7 @@ func (rs studentsResource) Routes() chi.Router {
 	r.Route("/archive", func(r chi.Router) {
 		r.Get("/", rs.ListArchived)
 		r.Route("/{id}", func(r chi.Router) {
-			r.Use(rs.UserCtx)
+			r.Use(rs.GroupCtx)
 			r.Delete("/", rs.Delete)
 		})
 	})
@@ -38,88 +38,84 @@ func (rs studentsResource) Routes() chi.Router {
 	return r
 }
 
-func (rs studentsResource) UserCtx(next http.Handler) http.Handler {
+func (rs groupsResource) GroupCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var student *db.Student
+		var group *db.Group
 		var err error
 
-		studentIDStr := chi.URLParam(r, "id")
-		if studentIDStr == "" {
+		groupIDStr := chi.URLParam(r, "id")
+		if groupIDStr == "" {
 			render.Render(w, r, ErrNotFound())
 			return
 		}
 
-		studentID, err := strconv.Atoi(studentIDStr)
+		groupID, err := strconv.Atoi(groupIDStr)
 		if err != nil {
 			render.Render(w, r, ErrInternal(err))
 			return
 		}
 
-		student, err = store.FindStudentByID(r.Context(), studentID)
+		group, err = store.FindGroupByID(r.Context(), groupID)
 		if err != nil {
 			render.Render(w, r, ErrNotFound())
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), "student", student)
+		ctx := context.WithValue(r.Context(), "group", group)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
-func (rs studentsResource) List(w http.ResponseWriter, r *http.Request) {
-	students, err := store.ListStudents(r.Context(), false)
+func (rs groupsResource) List(w http.ResponseWriter, r *http.Request) {
+	groups, err := store.ListGroups(r.Context(), false)
 	if err != nil {
 		render.Render(w, r, ErrInternal(err))
 		return
 	}
-	render.JSON(w, r, students)
+	render.JSON(w, r, groups)
 }
 
-func (rs studentsResource) Create(w http.ResponseWriter, r *http.Request) {
-	var s db.Student
-	if err := render.Decode(r, &s); err != nil {
+func (rs groupsResource) Create(w http.ResponseWriter, r *http.Request) {
+	var group db.Group
+	if err := render.Decode(r, &group); err != nil {
 		render.Render(w, r, ErrInvalidRequest(errors.New("invalid json payload")))
 		return
 	}
 
-	if s.Status == "" {
-		s.Status = "OUT"
-	}
-
-	if err := s.Validate(); err != nil {
+	if err := group.Validate(); err != nil {
 		render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
 
-	if err := store.AddStudent(r.Context(), &s); err != nil {
+	if err := store.AddGroup(r.Context(), &group); err != nil {
 		render.Render(w, r, ErrInternal(err))
 		return
 	}
 
-	bytes, err := json.Marshal(s)
+	bytes, err := json.Marshal(group)
 	if err != nil {
 		render.Render(w, r, ErrInternal(err))
 		return
 	}
 
 	hub.Broadcast(websockets.Event{
-		Event:   "student:new",
+		Event:   "group:new",
 		Payload: bytes,
 	})
 
 	render.Status(r, http.StatusCreated)
-	render.JSON(w, r, s)
+	render.JSON(w, r, group)
 }
 
-func (rs studentsResource) FindOne(w http.ResponseWriter, r *http.Request) {
-	student := r.Context().Value("student").(*db.Student)
-	render.JSON(w, r, student)
+func (rs groupsResource) FindOne(w http.ResponseWriter, r *http.Request) {
+	group := r.Context().Value("group").(*db.Group)
+	render.JSON(w, r, group)
 }
 
-func (rs studentsResource) Update(w http.ResponseWriter, r *http.Request) {
-	student := r.Context().Value("student").(*db.Student)
+func (rs groupsResource) Update(w http.ResponseWriter, r *http.Request) {
+	group := r.Context().Value("group").(*db.Group)
 
-	var req db.Student
+	var req db.Group
 	if err := render.Decode(r, &req); err != nil {
 		render.Render(w, r, ErrInvalidRequest(errors.New("invalid json payload")))
 		return
@@ -130,7 +126,7 @@ func (rs studentsResource) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := store.UpdateStudent(r.Context(), student.ID, &req); err != nil {
+	if err := store.UpdateGroup(r.Context(), group.ID, &req); err != nil {
 		render.Render(w, r, ErrInternal(err))
 		return
 	}
@@ -142,56 +138,56 @@ func (rs studentsResource) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	hub.Broadcast(websockets.Event{
-		Event:   "student:update",
+		Event:   "group:update",
 		Payload: bytes,
 	})
 
 	render.Status(r, 200)
-	render.JSON(w, r, student)
+	render.JSON(w, r, group)
 }
 
-func (rs studentsResource) Archive(w http.ResponseWriter, r *http.Request) {
-	student := r.Context().Value("student").(*db.Student)
+func (rs groupsResource) Archive(w http.ResponseWriter, r *http.Request) {
+	group := r.Context().Value("group").(*db.Group)
 
-	err := store.ArchiveStudentByID(r.Context(), student.ID)
+	err := store.ArchiveGroupByID(r.Context(), group.ID)
 	if err != nil {
 		render.Render(w, r, ErrInternal(err))
 		return
 	}
 
-	bytes, err := json.Marshal(student)
+	bytes, err := json.Marshal(group)
 	if err != nil {
 		render.Render(w, r, ErrInternal(err))
 		return
 	}
 
 	hub.Broadcast(websockets.Event{
-		Event:   "student:archive",
+		Event:   "group:archive",
 		Payload: bytes,
 	})
 
 	render.Status(r, 200)
-	render.JSON(w, r, student)
+	render.JSON(w, r, group)
 }
 
-func (rs studentsResource) ListArchived(w http.ResponseWriter, r *http.Request) {
-	students, err := store.ListStudents(r.Context(), true)
+func (rs groupsResource) ListArchived(w http.ResponseWriter, r *http.Request) {
+	groups, err := store.ListGroups(r.Context(), true)
 	if err != nil {
 		render.Render(w, r, ErrInternal(err))
 		return
 	}
-	render.JSON(w, r, students)
+	render.JSON(w, r, groups)
 }
 
-func (rs studentsResource) Delete(w http.ResponseWriter, r *http.Request) {
-	student := r.Context().Value("student").(*db.Student)
+func (rs groupsResource) Delete(w http.ResponseWriter, r *http.Request) {
+	group := r.Context().Value("group").(*db.Group)
 
-	err := store.DeleteStudentByID(r.Context(), student.ID)
+	err := store.DeleteGroupByID(r.Context(), group.ID)
 	if err != nil {
 		render.Render(w, r, ErrInternal(err))
 		return
 	}
 
 	render.Status(r, 200)
-	render.JSON(w, r, student)
+	render.JSON(w, r, group)
 }

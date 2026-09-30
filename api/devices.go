@@ -153,42 +153,71 @@ type DeviceResponse struct {
 	Paired   bool                   `json:"paired"`
 }
 
+// SSE stream, not a regular endpoint. For reference:
+// https://github.com/mdn/dom-examples/blob/main/server-sent-events/sse.php
+// https://developer.mozilla.org/en-US/docs/Web/API/EventSource
 func (rs devicesResource) Scan(w http.ResponseWriter, r *http.Request) {
+	rc := http.NewResponseController(w)
+
 	resolver, err := zeroconf.NewResolver(nil)
 	if err != nil {
 		render.Render(w, r, ErrInternal(err))
 		return
 	}
-	// TODO: Figure out how to do with render
-	w.Header().Set("Transfer-Encoding", "chunked")
+
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+	w.Header().Set("X-Accel-Buffering", "no") // disable proxy buffering (nginx for example)
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	entries := make(chan *zeroconf.ServiceEntry)
-	go func(results <-chan *zeroconf.ServiceEntry) {
-		for entry := range results {
-			dev := DeviceResponse{
-				Entry:    entry,
-				IPv4Addr: entry.AddrIPv4[0].To4().String(),
-				// Device should not advertise itself if paired
-				// TODO: Maybe check db still
-				Paired: false,
-			}
-			render.JSON(w, r, dev)
-			if f, ok := w.(http.Flusher); ok {
-				f.Flush()
-			}
-		}
-	}(entries)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	ctx, cancel := context.WithTimeout(r.Context(), time.Second*5)
 	defer cancel()
-	//err = resolver.Browse(ctx, "_services._dns-sd._udp", "local.", entries)
+
 	err = resolver.Browse(ctx, service, "local.", entries)
+	//err = resolver.Browse(ctx, "_services._dns-sd._udp", "local.", entries)
 	if err != nil {
 		render.Render(w, r, ErrInternal(err))
 		return
 	}
 
-	<-ctx.Done()
+	for entry := range entries {
+		select {
+		case <-ctx.Done():
+			return
+		default:
+		}
+
+		var ipStr string
+		if len(entry.AddrIPv4) > 0 {
+			ipStr = entry.AddrIPv4[0].To4().String()
+		}
+
+		dev := DeviceResponse{
+			Entry:    entry,
+			IPv4Addr: ipStr,
+			// Device should not advertise itself if paired
+			// TODO: Maybe check db still
+			Paired: false,
+		}
+
+		jsonData, err := json.Marshal(dev)
+		if err != nil {
+			continue
+		}
+
+		// in SSE format
+		fmt.Fprintf(w, "data: %s\n\n", jsonData)
+		if err := rc.Flush(); err != nil {
+			log.Println(err)
+			return
+		}
+	}
+
+	fmt.Fprintf(w, "event: close\ndata: done\n\n")
+	_ = rc.Flush()
 }
 
 type PairRequest struct {
@@ -214,15 +243,10 @@ func (rs devicesResource) Pair(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var devEntry *zeroconf.ServiceEntry
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-
+	ctx, cancel := context.WithTimeout(r.Context(), time.Second*5)
 	defer cancel()
+
 	entries := make(chan *zeroconf.ServiceEntry)
-	go func(results <-chan *zeroconf.ServiceEntry) {
-		devEntry = <-results
-		cancel()
-	}(entries)
 
 	err = resolver.Lookup(ctx, req.Name, service, "local.", entries)
 	if err != nil {
@@ -230,10 +254,24 @@ func (rs devicesResource) Pair(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	<-ctx.Done()
+	var devEntry *zeroconf.ServiceEntry
+
+	select {
+	case entry, ok := <-entries:
+		if ok {
+			devEntry = entry
+		}
+	case <-ctx.Done():
+	}
 
 	if devEntry == nil {
 		render.Render(w, r, ErrInvalidRequest(errors.New("pairing failed, device not found")))
+		return
+	}
+
+	if len(devEntry.Text) == 0 || len(devEntry.AddrIPv4) == 0 {
+		// Happens with zeroconf meta queries like services
+		render.Render(w, r, ErrInvalidRequest(errors.New("device service record is missing text or IP data")))
 		return
 	}
 
@@ -282,12 +320,17 @@ func (rs devicesResource) Pair(w http.ResponseWriter, r *http.Request) {
 		deleteDevice(store, dev.ID)
 		return
 	}
+	defer conn.Close()
 
 	buf := make([]byte, 2+len(pairResBytes))
 	binary.BigEndian.PutUint16(buf[0:2], uint16(len(pairResBytes)))
 	copy(buf[2:], pairResBytes)
 
-	conn.Write(buf)
+	if _, err := conn.Write(buf); err != nil {
+		render.Render(w, r, ErrInternal(err))
+		deleteDevice(store, dev.ID)
+		return
+	}
 
 	var ack [1]byte
 	if _, err := io.ReadFull(conn, ack[:]); err != nil {

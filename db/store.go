@@ -7,6 +7,19 @@ import (
 )
 
 var schema = `
+	CREATE TABLE IF NOT EXISTS teachers (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		name TEXT NOT NULL,
+		password_hash TEXT NOT NULL
+	);
+
+	CREATE TABLE IF NOT EXISTS groups (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+		is_archived BOOL NOT NULL DEFAULT FALSE,
+        created_at TEXT NOT NULL DEFAULT (datetime(current_timestamp, 'localtime'))
+	);
+
     CREATE TABLE IF NOT EXISTS students (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         uid TEXT NOT NULL UNIQUE,
@@ -19,14 +32,17 @@ var schema = `
         excluded_days TEXT DEFAULT '[]',
         break_time INTEGER NOT NULL DEFAULT 0,
 		is_archived BOOL NOT NULL DEFAULT FALSE,
-        created_at TEXT NOT NULL DEFAULT (datetime(current_timestamp, 'localtime'))
+		group_id INTEGER NOT NULL,
+        created_at TEXT NOT NULL DEFAULT (datetime(current_timestamp, 'localtime')),
+		FOREIGN KEY(group_id) REFERENCES groups(id) ON DELETE CASCADE
     );
 
     CREATE TABLE IF NOT EXISTS scans (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         uid TEXT NOT NULL,
         timestamp TEXT NOT NULL, 
-        student_id INTEGER NOT NULL
+        student_id INTEGER NOT NULL,
+        group_id INTEGER NOT NULL
     );
 
 	CREATE TABLE IF NOT EXISTS devices (

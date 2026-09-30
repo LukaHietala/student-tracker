@@ -11,13 +11,13 @@ import (
 
 func (s *Store) AddStudent(ctx context.Context, student *Student) error {
 	query := `
-        INSERT INTO students (uid, status, name, start_date, end_date, schedule, excluded_days, break_time)
-        VALUES (?,?,?,?,?,?,?,?)
+        INSERT INTO students (uid, status, name, start_date, end_date, schedule, excluded_days, break_time, group_id)
+        VALUES (?,?,?,?,?,?,?,?,?)
     `
 	res, err := s.db.ExecContext(
 		ctx, query,
 		student.UID, student.Status, student.Name, student.StartDate, student.EndDate,
-		student.Schedule, student.ExcludedDays, student.BreakTime,
+		student.Schedule, student.ExcludedDays, student.BreakTime, student.GroupID,
 	)
 	if err != nil {
 		return err
@@ -40,7 +40,7 @@ func (s *Store) AddStudent(ctx context.Context, student *Student) error {
 
 func (s *Store) ListStudents(ctx context.Context, archived bool) ([]*Student, error) {
 	query := `
-		SELECT id, uid, name, status, start_date, end_date, schedule, done_seconds, excluded_days, break_time, is_archived, created_at 
+		SELECT id, uid, name, status, start_date, end_date, schedule, done_seconds, excluded_days, break_time, is_archived, group_id, created_at 
 		FROM students
 	`
 
@@ -62,7 +62,7 @@ func (s *Store) ListStudents(ctx context.Context, archived bool) ([]*Student, er
 		err := rows.Scan(
 			&st.ID, &st.UID, &st.Name, &st.Status, &st.StartDate,
 			&st.EndDate, &st.Schedule, &st.DoneSeconds,
-			&st.ExcludedDays, &st.BreakTime, &st.IsArchived, &st.CreatedAt,
+			&st.ExcludedDays, &st.BreakTime, &st.IsArchived, &st.GroupID, &st.CreatedAt,
 		)
 		if err != nil {
 			return nil, err
@@ -84,7 +84,7 @@ func (s *Store) ListStudents(ctx context.Context, archived bool) ([]*Student, er
 
 func (s *Store) FindStudentByID(ctx context.Context, id int) (*Student, error) {
 	query := `
-		SELECT id, uid, name, status, start_date, end_date, schedule, done_seconds, excluded_days, break_time, is_archived, created_at
+		SELECT id, uid, name, status, start_date, end_date, schedule, done_seconds, excluded_days, break_time, is_archived, group_id, created_at
 		FROM students
 		WHERE id = ? LIMIT 1
 	`
@@ -93,7 +93,7 @@ func (s *Store) FindStudentByID(ctx context.Context, id int) (*Student, error) {
 	err := s.db.QueryRowContext(ctx, query, id).Scan(
 		&st.ID, &st.UID, &st.Name, &st.Status, &st.StartDate,
 		&st.EndDate, &st.Schedule, &st.DoneSeconds,
-		&st.ExcludedDays, &st.BreakTime, &st.IsArchived, &st.CreatedAt,
+		&st.ExcludedDays, &st.BreakTime, &st.IsArchived, &st.GroupID, &st.CreatedAt,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -113,7 +113,7 @@ func (s *Store) FindStudentByID(ctx context.Context, id int) (*Student, error) {
 
 func (s *Store) FindStudentByUID(ctx context.Context, uid string) (*Student, error) {
 	query := `
-		SELECT id, uid, name, status, start_date, end_date, schedule, done_seconds, excluded_days, break_time, is_archived, created_at
+		SELECT id, uid, name, status, start_date, end_date, schedule, done_seconds, excluded_days, break_time, is_archived, group_id, created_at
 		FROM students
 		WHERE uid = ? LIMIT 1
 	`
@@ -122,7 +122,7 @@ func (s *Store) FindStudentByUID(ctx context.Context, uid string) (*Student, err
 	err := s.db.QueryRowContext(ctx, query, uid).Scan(
 		&st.ID, &st.UID, &st.Name, &st.Status, &st.StartDate,
 		&st.EndDate, &st.Schedule, &st.DoneSeconds,
-		&st.ExcludedDays, &st.BreakTime, &st.IsArchived, &st.CreatedAt,
+		&st.ExcludedDays, &st.BreakTime, &st.IsArchived, &st.GroupID, &st.CreatedAt,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -151,12 +151,13 @@ func (s *Store) UpdateStudent(ctx context.Context, id int, student *Student) err
 			schedule = ?,
 			excluded_days = ?,
 			break_time = ?
+			group_id = ?
 		WHERE id = ?
     `
 	_, err := s.db.ExecContext(
 		ctx, query,
 		student.UID, student.Status, student.Name, student.StartDate, student.EndDate,
-		student.Schedule, student.ExcludedDays, student.BreakTime, id,
+		student.Schedule, student.ExcludedDays, student.BreakTime, student.GroupID, id,
 	)
 
 	if err != nil {

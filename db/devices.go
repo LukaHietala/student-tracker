@@ -13,6 +13,7 @@ func (s *Store) AddDevice(ctx context.Context, device *Device) error {
         VALUES (?,?,?,?,?)
     `
 
+	// TODO: Make sure it's unique
 	secret := randomKey(12)
 	res, err := s.db.ExecContext(ctx, query, device.Name, device.MacAddr, secret, device.IPv4Addr, device.Online)
 	if err != nil {

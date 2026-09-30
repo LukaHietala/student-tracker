@@ -5,9 +5,9 @@ import (
 )
 
 func (s *Store) NewScan(ctx context.Context, scan *Scan) error {
-	query := `INSERT INTO scans (uid, timestamp, student_id) VALUES (?,?,?)`
+	query := `INSERT INTO scans (uid, timestamp, student_id, group_id) VALUES (?,?,?,?)`
 
-	res, err := s.db.ExecContext(ctx, query, scan.UID, scan.Timestamp, scan.StudentID)
+	res, err := s.db.ExecContext(ctx, query, scan.UID, scan.Timestamp, scan.StudentID, scan.GroupID)
 	if err != nil {
 		return err
 	}
@@ -21,7 +21,7 @@ func (s *Store) NewScan(ctx context.Context, scan *Scan) error {
 }
 
 func (s *Store) ListScans(ctx context.Context) ([]*Scan, error) {
-	query := `SELECT id, uid, timestamp, student_id FROM scans`
+	query := `SELECT id, uid, timestamp, student_id, group_id FROM scans`
 
 	rows, err := s.db.QueryContext(ctx, query)
 	if err != nil {
@@ -32,7 +32,7 @@ func (s *Store) ListScans(ctx context.Context) ([]*Scan, error) {
 	scans := make([]*Scan, 0)
 	for rows.Next() {
 		sc := &Scan{}
-		err := rows.Scan(&sc.ID, &sc.UID, &sc.Timestamp, &sc.StudentID)
+		err := rows.Scan(&sc.ID, &sc.UID, &sc.Timestamp, &sc.StudentID, &sc.GroupID)
 		if err != nil {
 			return nil, err
 		}

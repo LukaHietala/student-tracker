@@ -86,6 +86,7 @@ type Scan struct {
 	UID       string `json:"uid"` // card uid
 	Timestamp string `json:"timestamp"`
 	StudentID int    `json:"student_id"`
+	GroupID   int    `json:"group_id"`
 }
 
 type Student struct {
@@ -101,10 +102,57 @@ type Student struct {
 	BreakTime    int             `json:"break_time"` // in seconds
 	Remaining    int             `json:"remaining"`  // in seconds, dynamically calculated
 	IsArchived   bool            `json:"is_archived"`
+	GroupID      int             `json:"group_id"`
 	CreatedAt    string          `json:"created_at"`
 }
 
+type Group struct {
+	ID         int    `json:"id"`
+	Name       string `json:"name"`
+	IsArchived bool   `json:"is_archived"`
+	CreatedAt  string `json:"created_at"`
+}
+
+type Teacher struct {
+	ID            int    `json:"id"`
+	Name          string `json:"name"`
+	PasswordPlain string `json:"password_plain"`
+	PasswordHash  string `json:"password_hash"`
+}
+
 // Validators for api
+
+func (t *Teacher) Validate() error {
+	if t == nil {
+		return errors.New("invalid teacher")
+	}
+
+	if t.Name == "" {
+		return errors.New("missing teacher name")
+	}
+
+	if len(t.Name) < 1 || len(t.Name) > 255 {
+		return errors.New("invalid teacher name length, valid range is 1-255")
+	}
+
+	return nil
+}
+
+func (g *Group) Validate() error {
+	if g == nil {
+		return errors.New("invalid group")
+	}
+
+	if g.Name == "" {
+		return errors.New("missing group name")
+	}
+
+	if len(g.Name) < 1 || len(g.Name) > 255 {
+		return errors.New("invalid group name length, valid range is 1-255")
+	}
+
+	return nil
+}
 
 func (d *Device) Validate() error {
 	if d == nil {
