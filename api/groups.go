@@ -191,3 +191,62 @@ func (rs groupsResource) Delete(w http.ResponseWriter, r *http.Request) {
 	render.Status(r, 200)
 	render.JSON(w, r, group)
 }
+
+func (rs groupsResource) ListGroupStudents(w http.ResponseWriter, r *http.Request) {
+	group := r.Context().Value("group").(*db.Group)
+	students, err := store.ListGroupStudents(r.Context(), false, group.ID)
+	if err != nil {
+		render.Render(w, r, ErrInternal(err))
+		return
+	}
+	render.JSON(w, r, students)
+}
+
+func (rs groupsResource) ListArchivedGroupStudents(w http.ResponseWriter, r *http.Request) {
+	group := r.Context().Value("group").(*db.Group)
+	students, err := store.ListGroupStudents(r.Context(), true, group.ID)
+	if err != nil {
+		render.Render(w, r, ErrInternal(err))
+		return
+	}
+	render.JSON(w, r, students)
+}
+
+func (rs groupsResource) CreateGroupStudent(w http.ResponseWriter, r *http.Request) {
+	group := r.Context().Value("group").(*db.Group)
+	var s db.Student
+	if err := render.Decode(r, &s); err != nil {
+		render.Render(w, r, ErrInvalidRequest(errors.New("invalid json payload")))
+		return
+	}
+
+	s.GroupID = group.ID
+
+	if s.Status == "" {
+		s.Status = "OUT"
+	}
+
+	if err := s.Validate(); err != nil {
+		render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+
+	if err := store.AddStudent(r.Context(), &s); err != nil {
+		render.Render(w, r, ErrInternal(err))
+		return
+	}
+
+	bytes, err := json.Marshal(s)
+	if err != nil {
+		render.Render(w, r, ErrInternal(err))
+		return
+	}
+
+	hub.Broadcast(websockets.Event{
+		Event:   "student:new",
+		Payload: bytes,
+	})
+
+	render.Status(r, http.StatusCreated)
+	render.JSON(w, r, s)
+}

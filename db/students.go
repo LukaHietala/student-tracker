@@ -151,13 +151,12 @@ func (s *Store) UpdateStudent(ctx context.Context, id int, student *Student) err
 			schedule = ?,
 			excluded_days = ?,
 			break_time = ?
-			group_id = ?
 		WHERE id = ?
     `
 	_, err := s.db.ExecContext(
 		ctx, query,
 		student.UID, student.Status, student.Name, student.StartDate, student.EndDate,
-		student.Schedule, student.ExcludedDays, student.BreakTime, student.GroupID, id,
+		student.Schedule, student.ExcludedDays, student.BreakTime, id,
 	)
 
 	if err != nil {
