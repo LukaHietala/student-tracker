@@ -97,7 +97,7 @@ func (s *Store) UpdateGroup(ctx context.Context, id int, group *Group) error {
 
 func (s *Store) ArchiveGroupByID(ctx context.Context, id int) error {
 	query := `
-		UPDATE group
+		UPDATE groups
 		SET is_archived = TRUE
 		WHERE id = ?
 	`
@@ -112,7 +112,7 @@ func (s *Store) ArchiveGroupByID(ctx context.Context, id int) error {
 
 func (s *Store) UnarchiveGroupByID(ctx context.Context, id int) error {
 	query := `
-		UPDATE students
+		UPDATE groups
 		SET is_archived = FALSE
 		WHERE id = ?
 	`

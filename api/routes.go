@@ -43,6 +43,7 @@ func NewRouter(s *db.Store, h *websockets.Hub) *chi.Mux {
 		r.Mount("/devices", devicesResource{}.Routes())
 		r.Mount("/scans", scanResource{}.Routes())
 		r.Mount("/groups", groupsResource{}.Routes())
+		r.Mount("/teachers", teachersResource{}.Routes())
 	})
 
 	return r
