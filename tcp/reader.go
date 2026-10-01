@@ -23,9 +23,14 @@ const (
 	HeaderSize int   = 48
 	MaxSkew    int64 = 5 // seconds
 
-	// Responses
-	AckOK     = 0x01
+	// Responses to reader
+	// OK, reader should start waiting for new uids.
+	AckOK = 0x01
+	// Invalid packet, reader should reset the connection.
 	AckFailed = 0xFF
+	// Denied the packet, packet had a valid structure but reader was not in
+	// paired devices. Reader should start repairing.
+	AckDenied = 0x64
 )
 
 type Server struct {
@@ -51,7 +56,7 @@ func (s *Server) Start(ctx context.Context) error {
 	}
 	defer s.ln.Close()
 
-	log.Printf("rfid tcp server listening on %s", s.addr)
+	log.Printf("listening for uid packets on %s", s.addr)
 
 	go func() {
 		<-ctx.Done()
@@ -94,6 +99,8 @@ func (s *Server) handleConn(conn net.Conn) {
 
 // https://github.com/LukaHietala/mfrc522-periph/blob/master/tcp.go#L15
 func (s *Server) processPacket(conn net.Conn) error {
+	_ = conn.SetReadDeadline(time.Now().Add(5 * time.Second))
+
 	var header [HeaderSize]byte
 	if _, err := io.ReadFull(conn, header[:]); err != nil {
 		return err
@@ -101,18 +108,20 @@ func (s *Server) processPacket(conn net.Conn) error {
 
 	magic := header[0]
 	if magic != MagicByte {
+		_ = s.sendAck(conn, AckFailed)
 		return errors.New("invalid magic byte")
 	}
 
 	uidLen := header[1]
 	if uidLen != 4 && uidLen != 7 {
+		_ = s.sendAck(conn, AckFailed)
 		return fmt.Errorf("invalid payload length %d (expected 4 or 7)", uidLen)
 	}
 
 	timestamp := int64(binary.BigEndian.Uint64(header[2:10]))
 	now := time.Now().Unix()
 	if timestamp < now-MaxSkew || timestamp > now+MaxSkew {
-		// Could be a replay attack
+		_ = s.sendAck(conn, AckFailed)
 		return errors.New("clock skew out of valid range")
 	}
 
@@ -125,12 +134,13 @@ func (s *Server) processPacket(conn net.Conn) error {
 
 	dev, err := s.store.FindDeviceByID(ctx, int(readerID))
 	if err != nil {
-		conn.Write([]byte{AckFailed})
+		_ = s.sendAck(conn, AckDenied)
 		return fmt.Errorf("reader %d not in allowed devices: %w", readerID, err)
 	}
 
 	uid := make([]byte, uidLen)
 	if _, err := io.ReadFull(conn, uid); err != nil {
+		_ = s.sendAck(conn, AckFailed)
 		return fmt.Errorf("failed to read uid payload: %w", err)
 	}
 
@@ -145,12 +155,20 @@ func (s *Server) processPacket(conn net.Conn) error {
 	mac.Write(uid)
 
 	if !hmac.Equal(mac.Sum(nil), devHash) {
+		_ = s.sendAck(conn, AckFailed)
+		// This usually means that the secret key is invalid
 		return errors.New("invalid hmac hash")
 	}
 
-	conn.Write([]byte{AckOK})
+	if err := s.sendAck(conn, AckOK); err != nil {
+		return fmt.Errorf("failed to send ack ok, check on your readers: %w", err)
+	}
 
-	return s.handleScan(ctx, hex.EncodeToString(uid), timestamp)
+	if err := s.handleScan(ctx, hex.EncodeToString(uid), timestamp); err != nil {
+		log.Printf("scan handling error: %v", err)
+	}
+
+	return nil
 }
 
 func (s *Server) handleScan(ctx context.Context, uidStr string, timestamp int64) error {
@@ -162,21 +180,25 @@ func (s *Server) handleScan(ctx context.Context, uidStr string, timestamp int64)
 
 	if err != nil || student == nil {
 		// If no student found it will send the scan event but with student id
-		// and group id as 0. This is for new student ui on the admin panel
+		// and group id as 0
 		if bytes, err := json.Marshal(scan); err == nil {
 			s.hub.Broadcast(websockets.Event{
 				Event:   "scan:new",
 				Payload: bytes,
 			})
 		}
-
-		return err
+		// Might skip over some actual errors
+		return nil
 	}
 
 	if student.Status == "IN" {
 		student.Status = "OUT"
 	} else {
 		student.Status = "IN"
+	}
+
+	if err := student.Validate(); err != nil {
+		return err
 	}
 
 	if err := s.store.UpdateStudent(ctx, student.ID, student); err != nil {
@@ -205,4 +227,10 @@ func (s *Server) handleScan(ctx context.Context, uidStr string, timestamp int64)
 	}
 
 	return nil
+}
+
+func (s *Server) sendAck(conn net.Conn, ack byte) error {
+	_ = conn.SetWriteDeadline(time.Now().Add(2 * time.Second))
+	_, err := conn.Write([]byte{ack})
+	return err
 }
