@@ -155,7 +155,21 @@ func (s *Server) processPacket(conn net.Conn) error {
 
 func (s *Server) handleScan(ctx context.Context, uidStr string, timestamp int64) error {
 	student, err := s.store.FindStudentByUID(ctx, uidStr)
-	if err != nil {
+	scan := &db.Scan{
+		UID:       uidStr,
+		Timestamp: time.Unix(timestamp, 0).Format(time.DateTime),
+	}
+
+	if err != nil || student == nil {
+		// If no student found it will send the scan event but with student id
+		// and group id as 0. This is for new student ui on the admin panel
+		if bytes, err := json.Marshal(scan); err == nil {
+			s.hub.Broadcast(websockets.Event{
+				Event:   "scan:new",
+				Payload: bytes,
+			})
+		}
+
 		return err
 	}
 
@@ -176,12 +190,9 @@ func (s *Server) handleScan(ctx context.Context, uidStr string, timestamp int64)
 		})
 	}
 
-	scan := &db.Scan{
-		UID:       uidStr,
-		StudentID: student.ID,
-		GroupID:   student.GroupID,
-		Timestamp: time.Unix(timestamp, 0).Format(time.DateTime),
-	}
+	scan.StudentID = student.ID
+	scan.GroupID = student.GroupID
+
 	if err := s.store.NewScan(ctx, scan); err != nil {
 		return fmt.Errorf("failed to create scan: %w", err)
 	}

@@ -35,6 +35,29 @@ button:disabled {
 	cursor: not-allowed;
 }
 
+input {
+	padding: 4px 8px;
+	margin: 4px 0;
+	box-sizing: border-box;
+	border: 1px solid #ccc;
+	border-radius: 2px;
+	outline: none;
+}
+
+input:focus {
+	border: 1px solid var(--primary);
+}
+
+select {
+    background-color: white;
+	padding: 4px 8px;
+	margin: 4px 0;
+	box-sizing: border-box;
+	border: 1px solid #ccc;
+	border-radius: 2px;
+	outline: none;
+}
+
 .small {
 	font-size: 0.8em;
 	color: var(--not-important);
@@ -89,6 +112,7 @@ button:disabled {
 	padding: 15px;
 	border-top: 1px solid var(--border);
 }
+
 .primary-btn {
 	background-color: white;
 	border: 1px solid var(--border-dark);
@@ -221,16 +245,20 @@ td {
 	}
 }
 
-.rot {
+.schedule-item {
 	display: flex;
     flex-direction: column;
     width: fit-content;
-    gap:5px;
+    gap: 2px;
 }
 
-.rotUp {
+.schedule {
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
 	display: flex;
 	flex-direction: row;
 	gap:10px;
+    overflow: scroll;
+    padding: 10px;
 }
 
