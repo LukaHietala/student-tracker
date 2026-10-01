@@ -56,7 +56,7 @@ class Calendar extends HTMLElement {
 				this.#reindeer();
 		}
 
-		#weekmask = [true,true,true,true,true,false,false];
+		#weekmask = [{},{},{},{},{},{},null];
 		get weekmask() {
 				return this.#weekmask;
 		}
@@ -111,15 +111,17 @@ class Calendar extends HTMLElement {
 						const day = id - startDay;
 						if (day > days || day <= 0) {
 								div.textContent = "";
+								div.classList.remove("calendar-box-selectable");
 								div.classList.remove("calendar-active");
 								return;
 						} else {
+								div.classList.add("calendar-box-selectable");
 								div.textContent = day;
 						}
 						// Is holiday
 						const date = `${this.#year}-${Calendar.pad(this.#month)}-${Calendar.pad(day)}`;
 						const weekday = (new Date(this.#year, this.#month - 1, day-1)).getDay();
-						if (this.#holidays.includes(date) || !this.#weekmask[weekday]) {
+						if (this.#holidays.includes(date) || this.#weekmask[weekday] == null) {
 								div.classList.add("calendar-active");
 						} else {
 								div.classList.remove("calendar-active");
@@ -138,6 +140,10 @@ class Calendar extends HTMLElement {
 
 				const cont = document.createElement("div");
 				cont.classList.add("calendar");
+
+				const topRow = document.createElement("div");
+				topRow.classList.add("calendar-row");
+				cont.appendChild(topRow);
 				
 				const b1 = document.createElement("button");
 				b1.textContent = "<-  ";
@@ -149,11 +155,11 @@ class Calendar extends HTMLElement {
 						}
 						_self.#reindeer();
 				});
-				cont.appendChild(b1);
+				topRow.appendChild(b1);
 
 				const t = document.createElement("span");
 				this.#title = t;
-				cont.appendChild(t);
+				topRow.appendChild(t);
 
 				const b2 = document.createElement("button");
 				b2.textContent = "  ->";
@@ -165,9 +171,10 @@ class Calendar extends HTMLElement {
 						}
 						_self.#reindeer();
 				});
-				cont.appendChild(b2);
+				topRow.appendChild(b2);
 
 				const table = document.createElement("table");
+				table.classList.add("calendar-table");
 				for (let row = 0; row < 7; row++) {
 						const rowDiv = document.createElement("tr");
 						for (let col = 0; col < 7; col++) {
@@ -192,11 +199,10 @@ class Calendar extends HTMLElement {
 												if (_self.#holidays.includes(date)) {
 														const index = _self.#holidays.indexOf(date);
 														_self.#holidays.splice(index, 1);
-														_self.#reindeer();
 												} else {
 														_self.#holidays.push(date);
-														b.classList.add("calendar-active");
 												}
+												_self.#reindeer();
 										});
 										_self.#squares.push(b);
 										return b;

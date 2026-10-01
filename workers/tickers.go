@@ -68,7 +68,7 @@ func StartDevicePingTicker(ctx context.Context, store *db.Store, interval time.D
 			}
 
 			for _, dev := range devices {
-				addr := dev.IPv4Addr + ":8080"
+				addr := dev.IPv4Addr + ":8081"
 				conn, err := net.DialTimeout("tcp", addr, 2*time.Second)
 
 				if err == nil {
