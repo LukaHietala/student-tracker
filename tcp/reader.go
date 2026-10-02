@@ -99,8 +99,6 @@ func (s *Server) handleConn(conn net.Conn) {
 
 // https://github.com/LukaHietala/mfrc522-periph/blob/master/tcp.go#L15
 func (s *Server) processPacket(conn net.Conn) error {
-	_ = conn.SetReadDeadline(time.Now().Add(5 * time.Second))
-
 	var header [HeaderSize]byte
 	if _, err := io.ReadFull(conn, header[:]); err != nil {
 		return err

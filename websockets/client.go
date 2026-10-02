@@ -18,7 +18,12 @@ const (
 	maxMessageSize = 1024 * 10
 )
 
-var upgrader = websocket.Upgrader{}
+var upgrader = websocket.Upgrader{
+	// Temp
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
+}
 
 type Client struct {
 	hub  *Hub
@@ -28,6 +33,7 @@ type Client struct {
 
 func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
+
 	if err != nil {
 		log.Println(err)
 		return

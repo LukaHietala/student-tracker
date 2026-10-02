@@ -24,6 +24,9 @@
                         </div>
                     </div>
                     <div class="editing-menu" x-show="adding" x-data="{ add_name:'' }">
+                        <div class="editing-menu-title">
+                            <span>Lisää uusi ryhmä</span>
+                        </div>
                         <div style="padding: 15px;">
                             <label for="name">Nimi:</label>
                             <input type="text" name="name" x-model="add_name"/>
@@ -45,8 +48,7 @@
                 </div>
                 <template x-for="group in $store.state.groups">
                     <div
-                        x-data="{ students: [], loading: false, loaded: false,
-								adding: false}">
+                        x-data="{ students: [], show: false, adding: false}">
                         <div class="item">
 							<span x-text="group.name"></span>
 							<div class="item-actions">
@@ -55,14 +57,12 @@
 									Lisää opiskelija
 								</button>
 								<button class="primary-btn"
-										x-on:click="if (loaded) {
+										x-on:click="if (show) {
 													students = [];
-													loaded = false;
+													show = false;
 													} else {
-													loading = true;
-													await getStudents(group.id, students);
-													loading = false;
-													loaded = true;
+													students = filterStudents(group.id);
+													show = true;
 													}
 													">
 									Näytä opiskelijat
@@ -75,11 +75,12 @@
                         </div>
 						<!-- Adding student -->
 						<div class="editing-menu" x-show="adding"
-							 x-data="{add_student:
-									 {
+							 x-data="{add_student: {
 									 schedule:defaultSchedule,
-									 excluded_days:[]
-									 }}">
+									 excluded_days:[],
+									 }}"
+                            style="margin-top: 6px;"
+							 >
                             <div class="editing-menu-title">
                                 <span>Lisää uusi opiskelija</span>
                             </div>
@@ -87,12 +88,21 @@
                                 <label for="name">Nimi:</label><br/>
                                 <input x-model="add_student.name"/><br/>
 								<label for="uid">Kortin UID:</label><br/>
-								<input type="text" name="uid"
-									   x-model="add_student.uid" placeholder="Skannaa tyhjä kortti"/><br/>
-                                <label for="status">Tila:</label><br/>
-                                <label for="start_date"> Aloitus päivä:</label>
+								<input type="text" name="uid" disabled
+									   x-model="add_student.uid"
+									   placeholder="Skannaa tyhjä kortti"/>
+								<button class="primary-btn"
+										x-show="$store.state.addingStudent == null"
+										x-on:click="$store.state.addingStudent = add_student">
+									Kuuntele skannauksia
+								</button>
+								<small x-show="$store.state.addingStudent != null">
+									Kuunnellaan skannauksia...
+								</small>
+								<br/>
+                                <label for="start_date"> Aloitus päivä:</label><br />
+                                <input x-model="add_student.start_date" type="date"/><br />
                                 <label for="start_date"> Lopetus päivä:</label><br/>
-                                <input x-model="add_student.start_date" type="date"/>
                                 <input x-model="add_student.end_date"
                                        type="date"/><br/>
                             </div>
@@ -311,22 +321,25 @@
 								<button class="primary-btn"
 										x-on:click=
 										"addStudent(group.id, add_student);
-										 await getStudents(group.id, students);
 										 adding=false;
+										 $store.state.addingStudent
+										 = null
 										 ">
-									Lisää</button>
+									Lisää
+								</button>
 								<button class="primary-btn"
-										x-on:click="adding=false">Peruuta</button>
+										x-on:click=
+										"adding=false;
+										 $store.state.addingStudent = null">
+									Peruuta
+								</button>
 							</div>
 						</div>
 						<!-- Students -->
-                        <div x-show="loading" class="item">
-                            <span>Ladataan...<span>
-                        </div>
-                        <div x-show="loaded && students.length == 0" class="item">
+                        <div x-show="show && students.length == 0" class="item">
                             <span>Ei opiskelijoita</span>
                         </div>
-                        <div class="list">
+                        <div x-show="show && students.length > 0" class="list" style="margin-top: 6px;">
                             <template x-for="student in students" :key="student.id">
                                 <div class="multi-item-container">
                                     <!-- Student info -->
@@ -352,9 +365,7 @@
                                             </button>
                                             <button class="icon-btn"
 													title="Arkistoi oppilas"
-													x-on:click="archiveStudent(student.id);
-																await getStudents(group.id, students)
-																">
+													x-on:click="archiveStudent(student.id)">
                                                 <img src="/static/archive.svg" alt="Arkistoi"/>
                                             </button>
                                         </div>
@@ -596,11 +607,21 @@
                                                 </div>
                                             </div>
                                             <div class="editing-menu-actions">
-                                                <button class="primary-btn" x-on:click="edit.excluded_days = document.getElementById('student_calendar').holidays;
-                                                                                        editStudent();
-                                                                                        student = edit;
-                                                                                        $store.state.editingStudent = null">Tallenna muokkaus</button>
-                                                <button class="primary-btn" x-on:click="$store.state.editingStudent = null">Peru</button>
+                                                <button class="primary-btn"
+														x-on:click=
+														"edit.excluded_days = document.getElementById('student_calendar').holidays;
+                                                         editStudent();
+                                                         student = edit;
+                                                         $store.state.editingStudent
+														 = null;">													
+													Tallenna muokkaus
+												</button>
+                                                <button class="primary-btn"
+														x-on:click=
+														"$store.state.editingStudent
+														 = null;">
+													Peru
+												</button>
                                             </div>
                                         </div>
                                     </template>
@@ -680,8 +701,12 @@
 				// Global items
 				pairedDevices: [],
 				groups: [],
+                students: [],
 				teachers: [],
 
+				// Adding (GLOBAL REFERENCE TO LOCAL VARIABLE)
+				addingStudent: null,
+				
 				// Editing
 				editingStudent: null,
 
@@ -707,6 +732,7 @@
 				async init() {
 					this.pairedDevices = await getPairedDevices();
 					this.groups = await getGroups();
+                    this.students = await getStudents();
 				},
 			});
 
@@ -734,6 +760,21 @@
 				{start: "08:00:00", end: "16:00:00"},
 				null, null
 			];
+			
+			window.filterStudents = (group_id) => state.students.filter((x) => x.group_id == group_id);
+			
+			async function getStudents() {
+                try {
+                    const response = await fetch(`/api/students`);
+                    if (!response.ok) {
+                        const result = await response.json();
+                        throw new Error(result.error);
+                    }
+					return await response.json();
+                } catch (error) {
+                    console.error(error.message);
+                }
+            }
 			
 			async function getGroups() {
 				try {
@@ -826,6 +867,7 @@
 						const result = await response.json();
 						throw new Error(result.error);
 					}
+					state.students = await getStudents();
 				} catch (error) {
 					console.error(error.message);
 				}
@@ -858,22 +900,9 @@
 						const result = await response.json();
 						throw new Error(result.error);
 					}
-                    const result = await response.json()
-                    toast(`Arkistoitiin ${result.name}`)
-                } catch (error) {
-                    console.error(error.message);
-                }
-            }
-
-            window.getStudents = async function(group_id, students) {
-                try {
-                    const response = await fetch(`/api/groups/${group_id}/students`);
-                    if (!response.ok) {
-                        const result = await response.json();
-                        throw new Error(result.error);
-                    }
-                    students.length = 0;
-                    students.push(...await response.json());
+                    const result = await response.json();
+                    toast(`Arkistoitiin ${result.name}`);
+					state.students = await getStudents();
                 } catch (error) {
                     console.error(error.message);
                 }
@@ -941,23 +970,40 @@
                 }
             }
 
-			const wsUri = "ws://localhost:3000/ws";
+			const wsUri = "ws://10.246.12.118:3000/ws";
 			const websocket = new WebSocket(wsUri);
 
 			websocket.addEventListener("message", (e) => {
 				const message = JSON.parse(e.data);
-
+				
 				switch (message.event) {
                 case "scan:new":
-                        // TODO: get student based on id
-                        toast("Uusi skannaus")
+                    const scan = message.payload
+                    if (scan.student_id === 0) {
+						if (state.addingStudent != null)
+							state.addingStudent.uid = scan.uid;
+                        return;
+                    }
+
+                    const student = state.students.find((student) => student.id === scan.student_id);
+                    if (student) {
+                        toast(`Uusi skannaus: ${student.name}`);
+                    } else {
+                        console.error("Scan student_id not found in students")
+                    }
+                    
 				case "student:new":
 					Alpine.store("state").students.push(message.payload);
+					
+                case "student:update":
+                    const updatedStudent = message.payload;
+					const ref = state.students[state.students.findIndex((student) => student.id === updatedStudent.id)];
+					modify(ref, updatedStudent);
 				default:
 					console.log("unknown event");
 				}
-				console.log(event);
 			});
+
             // 3e664845
             // 0c6f6ac0
             // 89021ae3

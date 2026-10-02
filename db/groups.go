@@ -96,14 +96,35 @@ func (s *Store) UpdateGroup(ctx context.Context, id int, group *Group) error {
 }
 
 func (s *Store) ArchiveGroupByID(ctx context.Context, id int) error {
-	query := `
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	groupQuery := `
 		UPDATE groups
 		SET is_archived = TRUE
 		WHERE id = ?
 	`
 
-	_, err := s.db.ExecContext(ctx, query, id)
+	studentQuery := `
+		UPDATE students
+		SET is_archived = TRUE
+		WHERE group_id = ?
+	`
+
+	_, err = tx.ExecContext(ctx, groupQuery, id)
 	if err != nil {
+		return err
+	}
+
+	_, err = tx.ExecContext(ctx, studentQuery, id)
+	if err != nil {
+		return err
+	}
+
+	if err = tx.Commit(); err != nil {
 		return err
 	}
 
