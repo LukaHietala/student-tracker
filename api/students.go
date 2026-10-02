@@ -24,6 +24,7 @@ func (rs studentsResource) Routes() chi.Router {
 		r.Get("/", rs.FindOne)
 		r.Put("/", rs.Update)
 		r.Delete("/", rs.Archive)
+		r.Post("/unarchive", rs.Unrchive)
 	})
 
 	r.Route("/archive", func(r chi.Router) {
@@ -130,6 +131,30 @@ func (rs studentsResource) Archive(w http.ResponseWriter, r *http.Request) {
 
 	hub.Broadcast(websockets.Event{
 		Event:   "student:archive",
+		Payload: bytes,
+	})
+
+	render.Status(r, 200)
+	render.JSON(w, r, student)
+}
+
+func (rs studentsResource) Unrchive(w http.ResponseWriter, r *http.Request) {
+	student := r.Context().Value("student").(*db.Student)
+
+	err := store.UnarchiveStudentByID(r.Context(), student.ID)
+	if err != nil {
+		render.Render(w, r, ErrInternal(err))
+		return
+	}
+
+	bytes, err := json.Marshal(student)
+	if err != nil {
+		render.Render(w, r, ErrInternal(err))
+		return
+	}
+
+	hub.Broadcast(websockets.Event{
+		Event:   "student:unarchive",
 		Payload: bytes,
 	})
 

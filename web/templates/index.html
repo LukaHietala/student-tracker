@@ -48,12 +48,24 @@
                 </div>
                 <template x-for="group in $store.state.groups">
                     <div
-                        x-data="{ students: [], show: false, adding: false}">
+                        x-data="{
+								students: [],
+								show: false,
+								adding: false,
+								add_student: JSON.parse(JSON.stringify(defaultStudent))
+								}">
                         <div class="item">
 							<span x-text="group.name"></span>
 							<div class="item-actions">
 								<button class="primary-btn"
-										x-on:click="adding = true">
+										x-on:click="if (adding) {
+													adding = false;
+													$store.state.addingStudent
+													= null;
+													add_student = JSON.parse(JSON.stringify(defaultStudent))
+													} else {
+													adding = true;
+													}">
 									Lisää opiskelija
 								</button>
 								<button class="primary-btn"
@@ -75,12 +87,7 @@
                         </div>
 						<!-- Adding student -->
 						<div class="editing-menu" x-show="adding"
-							 x-data="{add_student: {
-									 schedule:defaultSchedule,
-									 excluded_days:[],
-									 }}"
-                            style="margin-top: 6px;"
-							 >
+                             style="margin-top: 6px;">
                             <div class="editing-menu-title">
                                 <span>Lisää uusi opiskelija</span>
                             </div>
@@ -320,23 +327,26 @@
                             <div class="editing-menu-actions">
 								<button class="primary-btn"
 										x-on:click=
-										"addStudent(group.id, add_student);
+										"await addStudent(group.id, add_student);
 										 adding=false;
 										 $store.state.addingStudent
-										 = null
+										 = null;
+										 students = filterStudents(group.id);
+										 add_student = JSON.parse(JSON.stringify(defaultStudent))
 										 ">
 									Lisää
 								</button>
 								<button class="primary-btn"
 										x-on:click=
 										"adding=false;
-										 $store.state.addingStudent = null">
+										 $store.state.addingStudent = null;
+										 add_student = JSON.parse(JSON.stringify(defaultStudent))">
 									Peruuta
 								</button>
 							</div>
 						</div>
 						<!-- Students -->
-                        <div x-show="show && students.length == 0" class="item">
+                        <div x-show="show && students.length == 0" class="item"style="margin-top: 6px;">
                             <span>Ei opiskelijoita</span>
                         </div>
                         <div x-show="show && students.length > 0" class="list" style="margin-top: 6px;">
@@ -365,7 +375,8 @@
                                             </button>
                                             <button class="icon-btn"
 													title="Arkistoi oppilas"
-													x-on:click="archiveStudent(student.id)">
+													x-on:click="await archiveStudent(student.id);
+																students = filterStudents(group.id)">
                                                 <img src="/static/archive.svg" alt="Arkistoi"/>
                                             </button>
                                         </div>
@@ -686,7 +697,7 @@
 							<button class="icon-btn">
 								<img src="/static/pen.svg" alt="Edit"/>
 							</button>
-							<button class="icon-btn">
+							<button class="icon-btn" x-on:click="deleteDevice(device.id)">
 								<img src="/static/can.svg" alt="Unpair"/>
 							</button>
 						</div>
@@ -760,6 +771,11 @@
 				{start: "08:00:00", end: "16:00:00"},
 				null, null
 			];
+
+			window.defaultStudent = {
+				schedule: defaultSchedule,
+				excluded_days: [],
+			};
 			
 			window.filterStudents = (group_id) => state.students.filter((x) => x.group_id == group_id);
 			
@@ -772,6 +788,7 @@
                     }
 					return await response.json();
                 } catch (error) {
+                    toast(capitalizeFirstLetter(error.message))
                     console.error(error.message);
                 }
             }
@@ -786,6 +803,7 @@
 
 					return await response.json();
 				} catch (error) {
+                    toast(capitalizeFirstLetter(error.message))
 					console.error(error.message);
 				}
 			}
@@ -800,6 +818,7 @@
 
 					return await response.json();
 				} catch (error) {
+                    toast(capitalizeFirstLetter(error.message))
 					console.error(error.message);
 				}
 			}
@@ -814,6 +833,7 @@
 
 					return await response.json();
 				} catch (error) {
+                    toast(capitalizeFirstLetter(error.message))
 					console.error(error.message);
 				}
 			}
@@ -833,6 +853,7 @@
 					}
 					state.groups = await getGroups();
 				} catch (error) {
+                    toast(capitalizeFirstLetter(error.message))
 					console.error(error.message);
 				}
 			}
@@ -850,6 +871,7 @@
 					state.groups = await getGroups();
                     toast(`Arkistoitiin ${result.name}`)
                 } catch (error) {
+                    toast(capitalizeFirstLetter(error.message))
                     console.error(error.message);
                 }
             }
@@ -869,6 +891,7 @@
 					}
 					state.students = await getStudents();
 				} catch (error) {
+                    toast(capitalizeFirstLetter(error.message))
 					console.error(error.message);
 				}
 			}
@@ -887,6 +910,7 @@
 						throw new Error(result.error);
 					}
 				} catch (error) {
+                    toast(capitalizeFirstLetter(error.message))
 					console.error(error.message);
 				}
 			}
@@ -904,6 +928,44 @@
                     toast(`Arkistoitiin ${result.name}`);
 					state.students = await getStudents();
                 } catch (error) {
+                    toast(capitalizeFirstLetter(error.message))
+                    console.error(error.message);
+                }
+            }
+
+            /*window.editDevice = async function() {
+				try {
+					const response = await fetch(`/api/devices/${state.editingDevice.id}/`, {
+						method: "PUT",
+						headers: {
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify(state.editingStudent),
+					});
+					if (!response.ok) {
+						const result = await response.json();
+						throw new Error(result.error);
+					}
+				} catch (error) {
+                    toast(capitalizeFirstLetter(error.message))
+					console.error(error.message);
+				}
+			}*/
+
+            window.deleteDevice = async function(id) {
+				try {
+					const response = await fetch(`/api/devices/${id}`, {
+						method: "DELETE",
+					});
+					if (!response.ok) {
+						const result = await response.json();
+						throw new Error(result.error);
+					}
+                    const result = await response.json();
+					state.pairedDevices = await getPairedDevices();
+                    toast(`Poistettu yhteys laitteeseen: ${result.name}`);
+                } catch (error) {
+                    toast(capitalizeFirstLetter(error.message))
                     console.error(error.message);
                 }
             }
@@ -980,8 +1042,10 @@
                 case "scan:new":
                     const scan = message.payload
                     if (scan.student_id === 0) {
-						if (state.addingStudent != null)
+						if (state.addingStudent != null) {
 							state.addingStudent.uid = scan.uid;
+							state.addingStudent = null;
+						}
                         return;
                     }
 
@@ -991,14 +1055,20 @@
                     } else {
                         console.error("Scan student_id not found in students")
                     }
-                    
+                    break;
 				case "student:new":
-					Alpine.store("state").students.push(message.payload);
-					
+					state.students.push(message.payload);
+					break;
                 case "student:update":
                     const updatedStudent = message.payload;
 					const ref = state.students[state.students.findIndex((student) => student.id === updatedStudent.id)];
 					modify(ref, updatedStudent);
+                    break;
+                case "student:archive":
+                    const archivedStudent = message.payload;
+                    state.students.splice(
+                        state.students.findIndex(student => student.id === archivedStudent.id), 1);
+                    break;
 				default:
 					console.log("unknown event");
 				}

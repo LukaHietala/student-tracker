@@ -176,7 +176,7 @@ func (s *Server) handleScan(ctx context.Context, uidStr string, timestamp int64)
 		Timestamp: time.Unix(timestamp, 0).Format(time.DateTime),
 	}
 
-	if err != nil || student == nil {
+	if err != nil || student == nil || student.IsArchived {
 		// If no student found it will send the scan event but with student id
 		// and group id as 0
 		if bytes, err := json.Marshal(scan); err == nil {

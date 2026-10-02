@@ -176,7 +176,9 @@ func (s *Store) UpdateStudent(ctx context.Context, id int, student *Student) err
 func (s *Store) ArchiveStudentByID(ctx context.Context, id int) error {
 	query := `
 		UPDATE students
-		SET is_archived = TRUE
+		SET is_archived = TRUE,
+			status = 'OUT',
+			uid = ''
 		WHERE id = ?
 	`
 
@@ -188,6 +190,7 @@ func (s *Store) ArchiveStudentByID(ctx context.Context, id int) error {
 	return nil
 }
 
+// TODO: ask for new uid
 func (s *Store) UnarchiveStudentByID(ctx context.Context, id int) error {
 	query := `
 		UPDATE students

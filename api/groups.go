@@ -25,6 +25,7 @@ func (rs groupsResource) Routes() chi.Router {
 		r.Get("/", rs.FindOne)
 		r.Put("/", rs.Update)
 		r.Delete("/", rs.Archive)
+		r.Post("/unarchive", rs.Unarchive)
 		r.Route("/students", func(r chi.Router) {
 			r.Get("/", rs.ListGroupStudents)
 			r.Get("/archived", rs.ListArchivedGroupStudents)
@@ -168,6 +169,30 @@ func (rs groupsResource) Archive(w http.ResponseWriter, r *http.Request) {
 
 	hub.Broadcast(websockets.Event{
 		Event:   "group:archive",
+		Payload: bytes,
+	})
+
+	render.Status(r, 200)
+	render.JSON(w, r, group)
+}
+
+func (rs groupsResource) Unarchive(w http.ResponseWriter, r *http.Request) {
+	group := r.Context().Value("group").(*db.Group)
+
+	err := store.UnarchiveGroupByID(r.Context(), group.ID)
+	if err != nil {
+		render.Render(w, r, ErrInternal(err))
+		return
+	}
+
+	bytes, err := json.Marshal(group)
+	if err != nil {
+		render.Render(w, r, ErrInternal(err))
+		return
+	}
+
+	hub.Broadcast(websockets.Event{
+		Event:   "group:unarchive",
 		Payload: bytes,
 	})
 
