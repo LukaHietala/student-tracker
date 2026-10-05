@@ -102,8 +102,8 @@ func (rs devicesResource) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dev = &req
-	if err := store.UpdateDevice(r.Context(), dev.ID, req); err != nil {
+	dev.Name = req.Name
+	if err := store.UpdateDevice(r.Context(), dev.ID, *dev); err != nil {
 		render.Render(w, r, ErrInternal(err))
 		return
 	}

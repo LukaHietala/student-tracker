@@ -11,6 +11,9 @@
         <main x-data="">
 			<h3>Arkistoidut oppilaat</h3>
 			<div class="list">
+				<div x-show="$store.state.archivedStudents.length == 0" class="item">
+					Ei arkistoituja opiskelijoita.
+				</div>
 				<template x-for="student in $store.state.archivedStudents">
 					<div class="multi-item-container"
 						 x-data="{
@@ -24,15 +27,17 @@
 								<span x-text="secondsToHuman(student.done_seconds)"></span>
 								- Luotu:
 								<span x-text="student.created_at"></span>
-								<button class="icon-btn"
-										title="Näytä logit"
-										x-on:click="if (scans==null)
-													scans = await getScans(student.id)
-													else
-													scans = null">
-									Skannaukset
+							</div>
+                            <div class="item-actions">
+                                <button class="icon-btn"
+                                    title="Näytä logit"
+                                    x-on:click="if (scans==null)
+                                    scans = await getScans(student.id)
+                                    else
+                                    scans = null">
+                                    Skannaukset
                                 </button>
-							</div>							
+                            </div>
 						</div>
 						<!-- Scan log -->
 						<template x-if="scans != null">
