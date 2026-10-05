@@ -110,7 +110,9 @@ func (s *Store) ArchiveGroupByID(ctx context.Context, id int) error {
 
 	studentQuery := `
 		UPDATE students
-		SET is_archived = TRUE
+		SET is_archived = TRUE,
+			status = 'OUT',
+			uid = ?
 		WHERE group_id = ?
 	`
 
@@ -119,7 +121,12 @@ func (s *Store) ArchiveGroupByID(ctx context.Context, id int) error {
 		return err
 	}
 
-	_, err = tx.ExecContext(ctx, studentQuery, id)
+	uid, err := RandomGarbageUID(7)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.ExecContext(ctx, studentQuery, "garbage-"+uid, id)
 	if err != nil {
 		return err
 	}

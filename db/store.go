@@ -40,6 +40,7 @@ var schema = `
     CREATE TABLE IF NOT EXISTS scans (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         uid TEXT NOT NULL,
+        new_status TEXT CHECK( new_status IN ('IN','OUT') ) NOT NULL,
         timestamp TEXT NOT NULL, 
         student_id INTEGER NOT NULL,
         group_id INTEGER NOT NULL

@@ -5,9 +5,13 @@
 		<script type="text/javascript" src="/static/calendar.js"></script>
 		<script type="text/javascript" src="/static/utils.js"></script>
         <link rel="stylesheet" type="text/css" href="/static/styles.css">
+		<title>Etusivu</title>
 	</head>
 	<body>
 		<main x-data="">
+            <nav>
+                <a href="/archive">Arkisto</a>
+            </nav>
 			<!-- Groups -->
 			<h3>Ryhmät</h3>
             <div class="list">
@@ -351,7 +355,8 @@
                         </div>
                         <div x-show="show && students.length > 0" class="list" style="margin-top: 6px;">
                             <template x-for="student in students" :key="student.id">
-                                <div class="multi-item-container">
+                                <div class="multi-item-container"
+									 x-data="{ scans: null }">
                                     <!-- Student info -->
                                     <div class="item" :class="student.status == 'IN' ?
                                                               'active' : ''">
@@ -362,6 +367,14 @@
                                             <span class="small" x-text="'Kortin UID: '+student.uid"></span>
                                         </div>
                                         <div class="item-actions">
+                                            <button class="icon-btn"
+													title="Näytä logit"
+													x-on:click="if (scans==null)
+																scans = await getScans(student.id)
+																else
+																scans = null">
+												Skannaukset
+                                            </button>
                                             <button
                                                 class="icon-btn"
                                                 x-on:click=
@@ -636,6 +649,30 @@
                                             </div>
                                         </div>
                                     </template>
+									<!-- Scan log -->
+									<template x-if="scans != null">
+										<div>
+											<div class="inline-list">
+												<template x-for="scan in scans">
+													<div class="inline-item">
+														<span x-text="scan.timestamp">
+														</span> - 
+														<span x-show="scan.new_status=='IN'">
+															Skannattiin sisään
+														</span>
+														<span x-show="scan.new_status=='OUT'">
+															Skannattiin ulos
+														</span>
+													</div>
+												</template>
+												<div
+                                                    style="padding: 15px;"
+													 x-show="scans.length == 0">
+													Ei skannauksia
+												</div>
+											</div>
+										</div>
+									</template>
                                 </div>
                             </template>
                         </div>
@@ -852,6 +889,7 @@
 						throw new Error(result.error);
 					}
 					state.groups = await getGroups();
+                    toast(`Lisättiin ryhmä ${name}`)
 				} catch (error) {
                     toast(capitalizeFirstLetter(error.message))
 					console.error(error.message);
@@ -868,8 +906,8 @@
 						throw new Error(result.error);
 					}
                     const result = await response.json()
+                    toast(`Arkistoitiin ryhmä ${result.name}`)
 					state.groups = await getGroups();
-                    toast(`Arkistoitiin ${result.name}`)
                 } catch (error) {
                     toast(capitalizeFirstLetter(error.message))
                     console.error(error.message);
@@ -889,6 +927,7 @@
 						const result = await response.json();
 						throw new Error(result.error);
 					}
+                    toast(`Lisättiin oppilas ${student.name}`)
 					state.students = await getStudents();
 				} catch (error) {
                     toast(capitalizeFirstLetter(error.message))
@@ -909,6 +948,7 @@
 						const result = await response.json();
 						throw new Error(result.error);
 					}
+                    toast(`Muokattiin oppilasta ${state.editingStudent.name}`)
 				} catch (error) {
                     toast(capitalizeFirstLetter(error.message))
 					console.error(error.message);
@@ -946,6 +986,7 @@
 						const result = await response.json();
 						throw new Error(result.error);
 					}
+                    toast(`Muokattiin laitetta ${state.editingDevice.id}`)
 				} catch (error) {
                     toast(capitalizeFirstLetter(error.message))
 					console.error(error.message);
@@ -970,7 +1011,6 @@
                 }
             }
 
-            // TODO: const controller = new AbortController();
             window.scanDevices = function () {
                 state.deviceScan.devices = [];
                 state.deviceScan.message = "";
@@ -1031,6 +1071,20 @@
                     state.pairing.name = "";
                 }
             }
+
+			window.getScans = async function(student_id) {
+				try {
+                    const response = await fetch(`/api/scans/student/${student_id}`);
+					if (!response.ok) {
+						const result = await response.json();
+						throw new Error(result.error);
+					}
+					return await response.json();
+				} catch (error) {
+                    toast(capitalizeFirstLetter(error.message))
+					console.error(error.message);
+				}
+			}
 
 			const wsUri = "ws://10.246.12.118:3000/ws";
 			const websocket = new WebSocket(wsUri);

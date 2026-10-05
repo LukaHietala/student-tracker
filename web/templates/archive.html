@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+		<script type="text/javascript" src="/static/calendar.js"></script>
+		<script type="text/javascript" src="/static/utils.js"></script>
+		<link rel="stylesheet" type="text/css" href="/static/styles.css" />
+		<title>Arkisto</title>
+	</head>
+	<body>
+        <main x-data="">
+			<h3>Arkistoidut oppilaat</h3>
+			<div class="list">
+				<template x-for="student in $store.state.archivedStudents">
+					<div class="multi-item-container" x-data="{ retrieving: false }">
+						<div class="item">
+							<div>
+								<span x-text="student.name"></span>
+								- Töitä tehty:
+								<span x-text="secondsToHuman(student.done_seconds)"></span>
+								- Luotu:
+								<span x-text="student.created_at"></span>
+							</div>
+							<!-- <div class="item-actions"> -->
+							<!-- 	<button class="icon-btn" -->
+							<!-- 			title="Palauta oppilas" -->
+							<!-- 			x-on:click="retrieving = !retrieving"> -->
+							<!-- 		<img src="/static/unarchive.svg" alt="Palauta"/> -->
+							<!-- 	</button> -->
+							<!-- </div> -->
+						</div>
+						<!-- <div class="item" x-show="retrieving"> -->
+						<!-- 	<div class="editing-menu-title"> -->
+						<!-- 		Palauttaaksesi oppilaan takaisin, sinun täytyy -->
+						<!-- 		lisätä sille uusi RFID kortti. -->
+						<!-- 	</div> -->
+						<!-- 	<div> -->
+						<!-- 		<label for="uid">Kortin UID:</label><br/> -->
+						<!-- 		<input type="text" name="uid" disabled -->
+						<!-- 			   x-model="student.uid" -->
+						<!-- 			   placeholder="Skannaa tyhjä kortti"/> -->
+						<!-- 		<button class="primary-btn" -->
+						<!-- 				x-show="$store.state.addingStudent == null" -->
+						<!-- 				x-on:click="$store.state.addingStudent = student"> -->
+						<!-- 			Kuuntele skannauksia -->
+						<!-- 		</button> -->
+						<!-- 		<small x-show="$store.state.addingStudent != null"> -->
+						<!-- 			Kuunnellaan skannauksia... -->
+						<!-- 		</small><br> -->
+						<!-- 		<button class="primary-btn" -->
+						<!-- 				:disabled="!student.uid || -->
+						<!-- 						   student.uid.length < 1"> -->
+						<!-- 			Palauta oppilas -->
+						<!-- 		</button> -->
+						<!-- 	</div> -->
+						<!-- </div> -->
+					</div>
+				</template>
+			</div>
+		</main>
+	</body>
+	<script>
+		document.addEventListener("alpine:init", async () => {
+			Alpine.store("state", {
+                archivedStudents: [],
+
+				// Adding (GLOBAL REFERENCE TO LOCAL VARIABLE)
+				addingStudent: null,
+
+				async init() {
+					this.archivedStudents = await getArchivedStudents()
+				},
+			});
+
+			const state = Alpine.store("state");
+
+			async function getArchivedStudents() {
+				try {
+					const response = await fetch(`/api/students/archive`);
+					if (!response.ok) {
+						const result = await response.json();
+						throw new Error(result.error);
+					}
+					return await response.json();
+				} catch (error) {
+					toast(capitalizeFirstLetter(error.message));
+					console.error(error.message);
+				}
+			};
+		});
+        
+        const wsUri = "ws://10.246.12.118:3000/ws";
+        const websocket = new WebSocket(wsUri);
+
+        websocket.addEventListener("message", (e) => {
+            const message = JSON.parse(e.data);
+            
+            switch (message.event) {
+            case "scan:new":
+				const scan = message.payload;
+                if (scan.student_id === 0) {
+					if (state.addingStudent != null) {
+						state.addingStudent.uid = scan.uid;
+						state.addingStudent = null;
+					}
+                    return;
+                }
+                break;
+            }
+        });
+
+	</script>
+</html>

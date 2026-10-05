@@ -84,6 +84,7 @@ type Device struct {
 type Scan struct {
 	ID        int    `json:"id"`
 	UID       string `json:"uid"` // card uid
+	NewStatus string `json:"new_status"`
 	Timestamp string `json:"timestamp"`
 	StudentID int    `json:"student_id"`
 	GroupID   int    `json:"group_id"`

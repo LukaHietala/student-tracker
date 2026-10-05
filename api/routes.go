@@ -38,6 +38,10 @@ func NewRouter(s *db.Store, h *websockets.Hub) *chi.Mux {
 		http.ServeFileFS(w, r, templateFs, "index.html")
 	})
 
+	r.Get("/archive", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFileFS(w, r, templateFs, "archive.html")
+	})
+
 	r.Route("/api", func(r chi.Router) {
 		r.Mount("/students", studentsResource{}.Routes())
 		r.Mount("/devices", devicesResource{}.Routes())

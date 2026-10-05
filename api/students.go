@@ -19,6 +19,7 @@ func (rs studentsResource) Routes() chi.Router {
 	r := chi.NewRouter()
 
 	r.Get("/", rs.List)
+	r.Get("/all", rs.ListAll)
 	r.Route("/{id}", func(r chi.Router) {
 		r.Use(rs.StudentCtx)
 		r.Get("/", rs.FindOne)
@@ -68,6 +69,15 @@ func (rs studentsResource) StudentCtx(next http.Handler) http.Handler {
 
 func (rs studentsResource) List(w http.ResponseWriter, r *http.Request) {
 	students, err := store.ListStudents(r.Context(), false)
+	if err != nil {
+		render.Render(w, r, ErrInternal(err))
+		return
+	}
+	render.JSON(w, r, students)
+}
+
+func (rs studentsResource) ListAll(w http.ResponseWriter, r *http.Request) {
+	students, err := store.ListAllStudents(r.Context())
 	if err != nil {
 		render.Render(w, r, ErrInternal(err))
 		return

@@ -58,6 +58,10 @@ select {
 	outline: none;
 }
 
+a {
+    color: var(--primary)
+}
+
 .small {
 	font-size: 0.8em;
 	color: var(--not-important);
@@ -78,6 +82,21 @@ select {
 	border: 1px solid var(--border);
 	border-radius: 4px;
 	align-items: center;
+}
+
+.inline-list {
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    border: 1px solid var(--border);
+	border-radius: 4px;
+    max-height: 200px;
+    overflow: scroll;
+}
+
+.inline-item {
+    padding: 15px;
+    border-bottom: 1px solid var(--border)
 }
 
 .item-actions {

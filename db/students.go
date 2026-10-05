@@ -38,6 +38,7 @@ func (s *Store) AddStudent(ctx context.Context, student *Student) error {
 	return nil
 }
 
+// Archived/Unarcived
 func (s *Store) ListStudents(ctx context.Context, archived bool) ([]*Student, error) {
 	query := `
 		SELECT id, uid, name, status, start_date, end_date, schedule, done_seconds, excluded_days, break_time, is_archived, group_id, created_at 
@@ -49,6 +50,45 @@ func (s *Store) ListStudents(ctx context.Context, archived bool) ([]*Student, er
 	} else {
 		query += `WHERE is_archived = TRUE`
 	}
+
+	rows, err := s.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	students := make([]*Student, 0)
+	for rows.Next() {
+		st := &Student{}
+		err := rows.Scan(
+			&st.ID, &st.UID, &st.Name, &st.Status, &st.StartDate,
+			&st.EndDate, &st.Schedule, &st.DoneSeconds,
+			&st.ExcludedDays, &st.BreakTime, &st.IsArchived, &st.GroupID, &st.CreatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		students = append(students, st)
+	}
+
+	for _, s := range students {
+		remaining, err := calculateRemainingSeconds(*s)
+		if err != nil {
+			return nil, err
+		}
+		s.Remaining = remaining
+	}
+
+	return students, rows.Err()
+}
+
+// All, both archived and unarchived
+func (s *Store) ListAllStudents(ctx context.Context) ([]*Student, error) {
+	query := `
+		SELECT id, uid, name, status, start_date, end_date, schedule, done_seconds, excluded_days, break_time, is_archived, group_id, created_at 
+		FROM students
+	`
 
 	rows, err := s.db.QueryContext(ctx, query)
 	if err != nil {
@@ -178,11 +218,15 @@ func (s *Store) ArchiveStudentByID(ctx context.Context, id int) error {
 		UPDATE students
 		SET is_archived = TRUE,
 			status = 'OUT',
-			uid = ''
+			uid = ?
 		WHERE id = ?
 	`
 
-	_, err := s.db.ExecContext(ctx, query, id)
+	uid, err := RandomGarbageUID(7)
+	if err != nil {
+		return err
+	}
+	_, err = s.db.ExecContext(ctx, query, "garbage-"+uid, id)
 	if err != nil {
 		return err
 	}

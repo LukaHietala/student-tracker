@@ -212,6 +212,7 @@ func (s *Server) handleScan(ctx context.Context, uidStr string, timestamp int64)
 
 	scan.StudentID = student.ID
 	scan.GroupID = student.GroupID
+	scan.NewStatus = student.Status
 
 	if err := s.store.NewScan(ctx, scan); err != nil {
 		return fmt.Errorf("failed to create scan: %w", err)
