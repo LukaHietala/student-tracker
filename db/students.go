@@ -14,6 +14,7 @@ func (s *Store) AddStudent(ctx context.Context, student *Student) error {
         INSERT INTO students (uid, status, name, start_date, end_date, schedule, excluded_days, break_time, group_id)
         VALUES (?,?,?,?,?,?,?,?,?)
     `
+	// TODO: if group is archived refuse
 	res, err := s.db.ExecContext(
 		ctx, query,
 		student.UID, student.Status, student.Name, student.StartDate, student.EndDate,

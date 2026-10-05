@@ -109,10 +109,8 @@ func (s *Store) ArchiveGroupByID(ctx context.Context, id int) error {
 	`
 
 	studentQuery := `
-		UPDATE students
-		SET is_archived = TRUE,
-			status = 'OUT',
-			uid = ?
+		SELECT id
+		FROM students
 		WHERE group_id = ?
 	`
 
@@ -121,14 +119,48 @@ func (s *Store) ArchiveGroupByID(ctx context.Context, id int) error {
 		return err
 	}
 
-	uid, err := RandomGarbageUID(7)
+	// Exremely dirty but necessary to avoid UNIQUE constraint errors
+	rows, err := tx.QueryContext(ctx, studentQuery, id)
 	if err != nil {
 		return err
 	}
+	defer rows.Close()
 
-	_, err = tx.ExecContext(ctx, studentQuery, "garbage-"+uid, id)
-	if err != nil {
-		return err
+	var studentsToUpdate []int
+	for rows.Next() {
+		s := &Student{}
+		err := rows.Scan(
+			&s.ID,
+		)
+		if err != nil {
+			return err
+		}
+
+		studentsToUpdate = append(studentsToUpdate, s.ID)
+	}
+
+	if rows.Err() != nil {
+		return rows.Err()
+	}
+
+	for _, v := range studentsToUpdate {
+		updateQuery := `
+			UPDATE students
+			SET is_archived = TRUE,
+				status = 'OUT',
+				uid = ?
+			WHERE id = ?
+		`
+
+		uid, err := RandomGarbageUID(7)
+		if err != nil {
+			return err
+		}
+
+		_, err = tx.ExecContext(ctx, updateQuery, "garbage-"+uid, v)
+		if err != nil {
+			return err
+		}
 	}
 
 	if err = tx.Commit(); err != nil {

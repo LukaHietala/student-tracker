@@ -83,10 +83,25 @@
 													">
 									Näytä opiskelijat
 								</button>
-								<button class="icon-btn" title="Arkistoi ryhmä"
-										x-on:click="archiveGroup(group.id)">
-									<img src="/static/archive.svg" alt="Arkistoi"/>
-								</button>
+								<div x-data="{ confirm: false }">
+									<div x-show="!confirm">
+										<button class="icon-btn" title="Arkistoi ryhmä"
+												x-on:click="confirm = true;">
+											<img src="/static/archive.svg" alt="Arkistoi"/>
+										</button>
+									</div>
+									<div x-show="confirm">
+										<button class="primary-btn"
+											x-on:click="confirm = false">
+											Peru
+										</button>
+										<button class="icon-btn" title="Arkistoi ryhmä"
+												x-on:click="confirm = false;
+															archiveGroup(group.id)">
+											Varmista
+										</button>
+									</div>
+								</div>
 							</div>
                         </div>
 						<!-- Adding student -->
@@ -386,12 +401,27 @@
                                                  ">
                                                 <img src="/static/pen.svg" alt="Muokkaa"/>
                                             </button>
-                                            <button class="icon-btn"
-													title="Arkistoi oppilas"
-													x-on:click="await archiveStudent(student.id);
-																students = filterStudents(group.id)">
-                                                <img src="/static/archive.svg" alt="Arkistoi"/>
-                                            </button>
+											<div x-data="{ confirm: false }">
+												<div x-show="!confirm">
+													<button class="icon-btn"
+															title="Arkistoi oppilas"
+															x-on:click="confirm = true">
+														<img src="/static/archive.svg" alt="Arkistoi"/>
+													</button>
+												</div>
+												<div x-show="confirm">
+													<button class="primary-btn"
+															x-on:click="confirm = false">
+														Peru
+													</button>
+													<button class="primary-btn"
+															x-on:click="confirm = false;
+																		await archiveStudent(student.id);
+																		students = filterStudents(group.id);">
+														Varmista
+													</button>
+												</div>
+											</div>
                                         </div>
                                     </div>
                                     <!-- Editing menu -->
