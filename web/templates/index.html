@@ -116,6 +116,7 @@
 									   x-model="add_student.uid"
 									   placeholder="Skannaa tyhjä kortti"/>
 								<button class="primary-btn"
+                                        style="padding:4px 10px;"
 										x-show="$store.state.addingStudent == null"
 										x-on:click="$store.state.addingStudent = add_student">
 									Kuuntele skannauksia
@@ -660,7 +661,7 @@
                                                 <button class="primary-btn"
 														x-on:click=
 														"edit.excluded_days = document.getElementById('student_calendar').holidays;
-                                                         editStudent();
+                                                         await editStudent();
                                                          student = edit;
                                                          $store.state.editingStudent
 														 = null;">													
@@ -677,15 +678,40 @@
                                     </template>
 									<!-- Scan log -->
 									<template x-if="scans != null">
-                                        <div class="inline-list">
+                                        <div class="inline-list"
+											 x-data="{
+													 filter_start: '',
+													 filter_end: '',
+													 
+													 get filtered_scans() {
+													 return scans.filter(
+													 x =>
+													 (this.filter_start != '' &&
+													 this.filter_end != '' &&
+													 x.timestamp >= this.filter_start
+													 &&
+													 x.timestamp <= this.filter_end)
+													 ||
+													 (this.filter_start != '' &&
+													 this.filter_end == '' &&
+													 x.timestamp >= this.filter_start)
+													 ||
+													 (this.filter_end != '' &&
+													 this.filter_start == '' &&
+													 x.timestamp <= this.filter_end)
+													 ||
+													 (this.filter_start == '' &&
+													 this.filter_end == '')
+													 )}
+													 }">
                                             <div style="border-bottom: 1px solid var(--border); padding: 10px 15px; position: sticky;"> 
                                                 <label for="start_date"> Aloitus päivä:</label>
-                                                <input x-model="edit.start_date" type="date"/>
+                                                <input x-model="filter_start" type="date"/>
                                                 <label for="start_date"> Lopetus päivä:</label>
-                                                <input x-model="edit.end_date"
+                                                <input x-model="filter_end"
                                                        type="date"/>
                                             </div>
-                                            <template x-for="scan in scans">
+                                            <template x-for="scan in filtered_scans">
                                                 <div class="inline-item">
                                                     <span x-text="scan.timestamp">
                                                     </span> - 
@@ -699,7 +725,7 @@
                                             </template>
                                             <div
                                                 style="padding: 15px;"
-                                                x-show="scans.length == 0">
+                                                x-show="filtered_scans.length == 0">
                                                 Ei skannauksia
                                             </div>
 										</div>

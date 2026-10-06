@@ -118,7 +118,7 @@ type Teacher struct {
 	ID            int    `json:"id"`
 	Name          string `json:"name"`
 	PasswordPlain string `json:"password_plain"`
-	PasswordHash  string `json:"password_hash"`
+	PasswordHash  string `json:"password_hash,omitempty"`
 }
 
 // Validators for api

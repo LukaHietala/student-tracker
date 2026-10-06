@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Onboarding</title>
+		<link rel="stylesheet" href="static/styles.css" />
+		<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+	</head>
+	<body>
+		<main x-data="">
+            <h2>Luo ensimmäinen opettaja</h2>
+            <p>
+                Sivustolla tulee olla vähintään yksi opettaja
+            </p>
+            <div class="editing-menu">
+                <div class="editing-menu-form">
+                    <label>Nimi:</label><br />
+                    <input type="text" name="name" x-model="$store.state.name"/>
+                    <br/>
+                    <label>Salasana:</label><br/>
+                    <input type="password" name="email" x-model="$store.state.password"/>
+                    <br/>
+                </div>
+                <div class="editing-menu-actions">
+                    <button class="primary-btn"
+                            type="submit" x-on:click="createUser($event);">Lisää opettaja</button>
+                </div>
+            </div>
+		</main>
+	</body>
+	<script type="text/javascript">
+		document.addEventListener("alpine:init", async () => {
+			Alpine.store("state", {
+				name: "",
+				password: "",
+			});
+
+			window.createUser = async (event) => {
+				try {
+					const response = await fetch("/api/teachers", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify({
+							name: Alpine.store("state").name,
+							password_plain: Alpine.store("state").password
+						}),
+					});
+					if (!response.ok) {
+						const json = await response.json();
+						alert(json.error);
+					} else {
+						window.location.replace("/");
+					}
+				} catch (e) {
+					console.error(e.message);
+				}
+			};
+		});
+	</script>
+</html>

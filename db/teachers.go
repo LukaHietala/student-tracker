@@ -111,12 +111,41 @@ func (s *Store) DeleteTeacherByID(ctx context.Context, id int) error {
 	return nil
 }
 
+func (s *Store) TeacherCount() (int, error) {
+	var count int
+	err := s.db.QueryRow("SELECT COUNT(*) FROM teachers").Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
+}
+
+func (s *Store) VerifyTeacher(name, password string) (int, error) {
+	teacher := new(Teacher)
+	row := s.db.QueryRow("SELECT id, name, password_hash FROM teachers WHERE name = ?", name)
+	err := row.Scan(&teacher.ID, &teacher.Name, &teacher.PasswordHash)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return 0, fmt.Errorf("no user found with the name of: %s", name)
+		}
+		return 0, err
+	}
+
+	if verifyHash(password, teacher.PasswordHash) {
+		return teacher.ID, nil
+	} else {
+		return 0, fmt.Errorf("wrong password")
+	}
+}
+
 func hashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	return string(bytes), err
 }
 
-/*func verifyHash(password, hash string) bool {
+func verifyHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
-}*/
+}

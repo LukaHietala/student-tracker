@@ -12,6 +12,7 @@ import (
 
 	"github.com/lukahietala/rfid/api"
 	"github.com/lukahietala/rfid/db"
+	"github.com/lukahietala/rfid/services"
 	"github.com/lukahietala/rfid/tcp"
 	"github.com/lukahietala/rfid/websockets"
 	"github.com/lukahietala/rfid/workers"
@@ -40,6 +41,13 @@ func main() {
 			log.Printf("failed to start rfid card server: %v", err)
 		}
 	}()
+
+	cfg, err := services.LoadEnv()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	api.InitAuth(cfg.JWTSecret)
 
 	router := api.NewRouter(store, hub)
 	httpServer := &http.Server{
