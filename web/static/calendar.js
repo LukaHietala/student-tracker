@@ -56,7 +56,7 @@ class Calendar extends HTMLElement {
 				this.#reindeer();
 		}
 
-		#weekmask = [{},{},{},{},{},{},null];
+		#weekmask = [{},{},{},{},{},{},{}];
 		get weekmask() {
 				return this.#weekmask;
 		}

@@ -99,6 +99,14 @@ a {
     border-bottom: 1px solid var(--border)
 }
 
+.inline-list-filter {
+    position: sticky;
+    top:0;
+    padding: 10px 15px;
+    background-color: white;
+    border-bottom: 1px solid var(--border);
+}
+
 .item-actions {
 	display: inline-flex;
 	gap: 6px;

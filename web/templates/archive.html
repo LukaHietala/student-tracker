@@ -11,6 +11,7 @@
         <main x-data="">
 			<nav>
                 <a href="/">Pääsivu</a>
+				<a href="/logout">Kirjaudu ulos</a>
 			</nav>
 			<h3>Arkistoidut oppilaat</h3>
 			<div class="list">
@@ -71,7 +72,7 @@
 											 this.filter_end == '')
 											 )}
 											 }">
-                                    <div style="border-bottom: 1px solid var(--border); padding: 10px 15px; position: sticky;"> 
+                                    <div class="inline-list-filter"> 
                                         <label for="start_date"> Aloitus päivä:</label>
                                         <input x-model="filter_start" type="date"/>
                                         <label for="start_date"> Lopetus päivä:</label>

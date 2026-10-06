@@ -1,6 +1,8 @@
 package services
 
 import (
+	"log"
+
 	"github.com/caarlos0/env/v11"
 	"github.com/joho/godotenv"
 )
@@ -18,6 +20,10 @@ func LoadEnv() (Config, error) {
 
 	if err := env.Parse(&cfg); err != nil {
 		return Config{}, err
+	}
+
+	if cfg.JWTSecret == "" {
+		log.Fatal("JWT_SECRET must be set in .env")
 	}
 
 	return cfg, nil

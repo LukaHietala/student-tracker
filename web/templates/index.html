@@ -11,7 +11,9 @@
 		<main x-data="">
             <nav>
                 <a href="/archive">Arkisto</a>
+                <a href="/logout">Kirjaudu ulos</a>
             </nav>
+
 			<!-- Groups -->
 			<h3>Ryhmät</h3>
             <div class="list">
@@ -56,11 +58,17 @@
 								students: [],
 								show: false,
 								adding: false,
-								add_student: JSON.parse(JSON.stringify(defaultStudent))
+								add_student:
+								JSON.parse(JSON.stringify(defaultStudent)),
+								mass_editing: false
 								}">
                         <div class="item">
 							<span x-text="group.name"></span>
 							<div class="item-actions">
+								<button class="primary-btn"
+										x-on:click="mass_editing = !mass_editing">
+									Massamuokkaus
+								</button>
 								<button class="primary-btn"
 										x-on:click="if (adding) {
 													adding = false;
@@ -102,6 +110,284 @@
 								</div>
 							</div>
                         </div>
+						<!-- Mass editing -->
+						<div class="editing-menu" x-show="mass_editing" style="margin-top: 6px;">
+							<div class="editing-menu-title">
+                                <span>
+									Muokkaa kaikkia ryhmään kuuluvia
+									opiskelijoita koskevia muuttujia
+                                </span>
+                            </div>
+
+                            <!-- Time frame -->
+                            <div x-data="{ mass_start: '', mass_end: ''}">
+                                <div style="padding: 15px; border-bottom: 1px solid var(--border);">
+                                    <span>Ajanjakso</span><br/>
+                                    <small>
+                                        Ajanjaksoon tehdy muutokset korvaavat
+                                        kaikkien opiskelijoiden aijemmat ajanjaksot.
+                                    </small>
+                                </div>
+                                
+                                <div style="padding: 15px; border-bottom: 1px solid var(--border);">
+                                    <label for="start_date">Aloitus päivä:</label><br />
+                                    <input x-model="mass_start" type="date"/><br />
+                                    <label for="start_date">Lopetus päivä:</label><br/>
+                                    <input x-model="mass_end"
+                                           type="date"/><br/>
+                                </div>
+                                <div style="padding: 15px;">
+                                    <button class="primary-btn"
+                                            x-on:click="editDatesAll(group.id,
+                                                        mass_start, mass_end)">
+                                        Muokkaa ajanjaksoa
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div style="padding: 15px; border-top: 1px solid var(--border);">
+                                <span>Aikataulu</span><br/>
+                                <small>
+									Aikatauluun tehdyt muutokset korvaavat
+									kaikkien opiskelijoiden aiemmat aikataulut.
+								</small>
+                            </div>
+
+                            <!-- Schedule -->
+							<div x-data="{ mass_schedule: defaultSchedule }">
+								<div class="schedule">
+									<div class="schedule-item"
+										 :class="mass_schedule[0] == null ?
+												 'disabled' : ''">
+										<span style="text-align:center;">Ma</span>
+										<template x-if="mass_schedule[0]==null">
+											<input type="time"
+												   :disabled="mass_schedule[0]==null"/>
+										</template>
+										<template x-if="mass_schedule[0]==null">
+											<input type="time"
+												   :disabled="mass_schedule[0]==null"/>
+										</template>
+										<template x-if="mass_schedule[0]!=null">
+											<input type="time"
+												   x-model="mass_schedule[0].start"/>
+										</template>
+										<template x-if="mass_schedule[0]!=null">
+											<input type="time"
+												   x-model="mass_schedule[0].end"/>
+										</template>
+										<input type="checkbox"
+											   :checked="mass_schedule[0]!=null"
+											   x-on:click=
+											   "if(mass_schedule[0]==null)
+												mass_schedule[0]={start:'08:00:00',end:'16:00:00'}
+												else
+												mass_schedule[0]=null">
+									</div>
+									<div class="schedule-item"
+										 :class="mass_schedule[1] == null ?
+												 'disabled' : ''">
+										<span style="text-align:center;">Ti</span>
+										<template x-if="mass_schedule[1]==null">
+											<input type="time"
+												   :disabled="mass_schedule[1]==null"/>
+										</template>
+										<template x-if="mass_schedule[1]==null">
+											<input type="time"
+												   :disabled="mass_schedule[1]==null"/>
+										</template>
+										<template x-if="mass_schedule[1]!=null">
+											<input type="time"
+												   x-model="mass_schedule[1].start"/>
+										</template>
+										<template x-if="mass_schedule[1]!=null">
+											<input type="time"
+												   x-model="mass_schedule[1].end"/>
+										</template>
+										<input type="checkbox"
+											   :checked="mass_schedule[1]!=null"
+											   x-on:click=
+											   "if(mass_schedule[1]==null)
+												mass_schedule[1]={start:'08:00:00',end:'16:00:00'}
+												else
+												mass_schedule[1]=null">
+									</div>
+									<div class="schedule-item"
+										 :class="mass_schedule[2] == null ?
+												 'disabled' : ''">
+										<span style="text-align:center;">Ke</span>
+										<template x-if="mass_schedule[2]==null">
+											<input type="time"
+												   :disabled="mass_schedule[2]==null"/>
+										</template>
+										<template x-if="mass_schedule[2]==null">
+											<input type="time"
+												   :disabled="mass_schedule[2]==null"/>
+										</template>
+										<template x-if="mass_schedule[2]!=null">
+											<input type="time"
+												   x-model="mass_schedule[2].start"/>
+										</template>
+										<template x-if="mass_schedule[2]!=null">
+											<input type="time"
+												   x-model="mass_schedule[2].end"/>
+										</template>
+										<input type="checkbox"
+											   :checked="mass_schedule[2]!=null"
+											   x-on:click=
+											   "if(mass_schedule[2]==null)
+												mass_schedule[2]={start:'08:00:00',end:'16:00:00'}
+												else
+												mass_schedule[2]=null">
+									</div>
+									<div class="schedule-item"
+										 :class="mass_schedule[3] == null ?
+												 'disabled' : ''">
+										<span style="text-align:center;">To</span>
+										<template x-if="mass_schedule[3]==null">
+											<input type="time"
+												   :disabled="mass_schedule[3]==null"/>
+										</template>
+										<template x-if="mass_schedule[3]==null">
+											<input type="time"
+												   :disabled="mass_schedule[3]==null"/>
+										</template>
+										<template x-if="mass_schedule[3]!=null">
+											<input type="time"
+												   x-model="mass_schedule[3].start"/>
+										</template>
+										<template x-if="mass_schedule[3]!=null">
+											<input type="time"
+												   x-model="mass_schedule[3].end"/>
+										</template>
+										<input type="checkbox"
+											   :checked="mass_schedule[3]!=null"
+											   x-on:click=
+											   "if(mass_schedule[3]==null)
+												mass_schedule[3]={start:'08:00:00',end:'16:00:00'}
+												else
+												mass_schedule[3]=null">
+									</div>
+									<div class="schedule-item"
+										 :class="mass_schedule[4] == null ?
+												 'disabled' : ''">
+										<span style="text-align:center;">Pe</span>
+										<template x-if="mass_schedule[4]==null">
+											<input type="time"
+												   :disabled="mass_schedule[4]==null"/>
+										</template>
+										<template x-if="mass_schedule[4]==null">
+											<input type="time"
+												   :disabled="mass_schedule[4]==null"/>
+										</template>
+										<template x-if="mass_schedule[4]!=null">
+											<input type="time"
+												   x-model="mass_schedule[4].start"/>
+										</template>
+										<template x-if="mass_schedule[4]!=null">
+											<input type="time"
+												   x-model="mass_schedule[4].end"/>
+										</template>
+										<input type="checkbox"
+											   :checked="mass_schedule[4]!=null"
+											   x-on:click=
+											   "if(mass_schedule[4]==null)
+												mass_schedule[4]={start:'08:00:00',end:'16:00:00'}
+												else
+												mass_schedule[4]=null">
+									</div>
+									<div class="schedule-item"
+										 :class="mass_schedule[5] == null ?
+												 'disabled' : ''">
+										<span style="text-align:center;">La</span>
+										<template x-if="mass_schedule[5]==null">
+											<input type="time"
+												   :disabled="mass_schedule[5]==null"/>
+										</template>
+										<template x-if="mass_schedule[5]==null">
+											<input type="time"
+												   :disabled="mass_schedule[5]==null"/>
+										</template>
+										<template x-if="mass_schedule[5]!=null">
+											<input type="time"
+												   x-model="mass_schedule[5].start"/>
+										</template>
+										<template x-if="mass_schedule[5]!=null">
+											<input type="time"
+												   x-model="mass_schedule[5].end"/>
+										</template>
+										<input type="checkbox"
+											   :checked="mass_schedule[5]!=null"
+											   x-on:click=
+											   "if(mass_schedule[5]==null)
+												mass_schedule[5]={start:'08:00:00',end:'16:00:00'}
+												else
+												mass_schedule[5]=null">
+									</div>
+									<div class="schedule-item"
+										 :class="mass_schedule[6] == null ?
+												 'disabled' : ''">
+										<span style="text-align:center;">Su</span>
+										<template x-if="mass_schedule[6]==null">
+											<input type="time"
+												   :disabled="mass_schedule[6]==null"/>
+										</template>
+										<template x-if="mass_schedule[6]==null">
+											<input type="time"
+												   :disabled="mass_schedule[6]==null"/>
+										</template>
+										<template x-if="mass_schedule[6]!=null">
+											<input type="time"
+												   x-model="mass_schedule[6].start"/>
+										</template>
+										<template x-if="mass_schedule[6]!=null">
+											<input type="time"
+												   x-model="mass_schedule[6].end"/>
+										</template>
+										<input type="checkbox"
+											   :checked="mass_schedule[6]!=null"
+											   x-on:click=
+											   "if(mass_schedule[6]==null)
+												mass_schedule[6]={start:'08:00:00',end:'16:00:00'}
+												else
+												mass_schedule[6]=null">
+									</div>
+								</div>
+                                <div style="padding: 15px; border-bottom: 1px solid var(--border)">
+                                    <button class="primary-btn"
+										x-on:click="editScheduleAll(group.id, mass_schedule)">
+										Muokkaa aikataulua
+									</button>
+                                </div>
+							</div>
+							
+                            <!-- BLOAT!! -->
+
+							<div style="padding: 15px; border-bottom: 1px solid var(--border)">
+                                <label for="excluded_days">Vapaapäivät
+									(sinisellä):</label><br/>
+								<small>
+									Tämä lisää kaikille opiskelijoille nämä
+									päivät vapaaksi. Jos jollakin opiskelijalla
+									on jo tämä päivä vapaana, se ei muutu. Tämä
+									ei myöskään poista vapaa päiviä joita on jo
+									muuten aseteltu oppilaille.
+								</small>
+                            </div>
+                            <div style="padding: 15px; border-bottom: 1px solid var(--border);">
+                                <calendar-component id="mass_calendar">
+									</calendar-component>
+							</div>
+                            <div style="padding: 15px;">
+                                <button class="primary-btn">Lisää vapaapäivät</button>
+                            </div>
+                            <div class="editing-menu-actions">
+								<button class="primary-btn"
+										x-on:click="mass_editing = false">
+									Peruuta
+								</button>
+							</div>
+						</div>
 						<!-- Adding student -->
 						<div class="editing-menu" x-show="adding"
                              style="margin-top: 6px;">
@@ -440,11 +726,15 @@
                                                         <option value="IN">IN</option>
                                                         <option value="OUT">OUT</option>
                                                     </select><br/>
-                                                    <label for="start_date"> Aloitus päivä:</label>
+                                                    <label for="done_seconds">Tehty työ:</label><br/>
+                                                    <!-- TODO: Luukas -->
+                                                    <label for="break_time">Tauko (per päivä)</label><br/>
+                                                    <!-- TODO: Luukas -->
+                                                    <label for="start_date"> Aloitus päivä:</label><br/>
+                                                    <input x-model="edit.start_date" type="date"/><br/>
                                                     <label for="start_date"> Lopetus päivä:</label><br/>
-                                                    <input x-model="edit.start_date" type="date"/>
                                                     <input x-model="edit.end_date"
-                                                           type="date"/><br/>
+                                                           type="date"/>
                                                 </div>
 
                                                 <!-- BLOAT!! -->
@@ -652,7 +942,7 @@
                                                 
                                                 <div style="padding: 15px;">
                                                     <label for="excluded_days">Vapaapäivät (sinisellä):</label><br/>
-                                                    <calendar-component :holidays="edit.excluded_days" id="student_calendar"
+                                                    <calendar-component :holidays="edit.excluded_days" id="edit_calendar"
                                                                         :weekmask="edit.schedule">
                                                     </calendar-component>
                                                 </div>
@@ -660,7 +950,7 @@
                                             <div class="editing-menu-actions">
                                                 <button class="primary-btn"
 														x-on:click=
-														"edit.excluded_days = document.getElementById('student_calendar').holidays;
+														"edit.excluded_days = document.getElementById('edit_calendar').holidays;
                                                          await editStudent();
                                                          student = edit;
                                                          $store.state.editingStudent
@@ -678,7 +968,7 @@
                                     </template>
 									<!-- Scan log -->
 									<template x-if="scans != null">
-                                        <div class="inline-list"
+										<div class="inline-list"
 											 x-data="{
 													 filter_start: '',
 													 filter_end: '',
@@ -704,7 +994,7 @@
 													 this.filter_end == '')
 													 )}
 													 }">
-                                            <div style="border-bottom: 1px solid var(--border); padding: 10px 15px; position: sticky;"> 
+                                            <div class="inline-list-filter"> 
                                                 <label for="start_date"> Aloitus päivä:</label>
                                                 <input x-model="filter_start" type="date"/>
                                                 <label for="start_date"> Lopetus päivä:</label>
@@ -783,7 +1073,7 @@
 					<div class="multi-item-container" x-data="{ editing: false}">
 						<div class="item" :class="device.online ? 'active' : ''">
 							<div>
-								<span x-text="device.name"></span>
+								<span x-text="device.name"></span> - 
 								<span>Tila: </span>
 								<span x-text="device.online ? 'Linjoilla' : 'Ei yhteyttä'"></span><br/>
 								<span class="small" x-text="device.mac_addr"></span>
@@ -1146,7 +1436,7 @@
                     }
 
                     const result = await response.json()
-                    toast(`Pari lukijan ${result.name} muodostettu onnistuneesti`)
+                    toast(`Pari lukijan ${result.name} kanssa muodostettu onnistuneesti`)
                     state.pairedDevices.push(result)
                     state.deviceScan.devices.splice(
                         state.deviceScan.devices.findIndex(item => item.entry.name === result.name), 1);
@@ -1170,6 +1460,52 @@
 				} catch (error) {
                     toast(capitalizeFirstLetter(error.message))
 					console.error(error.message);
+				}
+			}
+				
+			window.editDatesAll = async function(group_id, start_date, end_date) {
+				try {
+					const dates = {start_date: start_date, end_date: end_date};
+					filterStudents(group_id).forEach(async function(student) {
+						const nstudent = {...student, ...dates};
+						const response = await fetch(`/api/students/${student.id}/`, {
+							method: "PUT",
+							headers: {
+								"Content-Type": "application/json",
+							},
+							body: JSON.stringify(nstudent),
+						});
+						if (!response.ok) {
+							const result = await response.json();
+							throw new Error(result.error);
+						}
+					});
+				} catch (error) {
+				    toast(capitalizeFirstLetter(error.message))
+					console.error(error.message);	
+				}
+			}
+
+			window.editScheduleAll = async function(group_id, schedule) {
+				try {
+					const e = { schedule: schedule };
+					filterStudents(group_id).forEach(async function(student) {
+						const nstudent = { ...student, ...e };
+						const response = await fetch(`/api/students/${student.id}/`, {
+							method: "PUT",
+							headers: {
+								"Content-Type": "application/json",
+							},
+							body: JSON.stringify(nstudent),
+						});
+						if (!response.ok) {
+							const result = await response.json();
+							throw new Error(result.error);
+						}
+					});
+				} catch (error) {
+				    toast(capitalizeFirstLetter(error.message))
+					console.error(error.message);	
 				}
 			}
 
