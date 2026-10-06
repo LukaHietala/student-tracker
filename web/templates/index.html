@@ -379,7 +379,11 @@
 									</calendar-component>
 							</div>
                             <div style="padding: 15px;">
-                                <button class="primary-btn">Lisää vapaapäivät</button>
+                                <button class="primary-btn"
+										x-on:click="h = document.getElementById('mass_calendar').holidays;
+													appendHolidaysAll(group.id, h)">
+									Lisää vapaapäivät
+								</button>
                             </div>
                             <div class="editing-menu-actions">
 								<button class="primary-btn"
@@ -718,7 +722,13 @@
                                                 <span x-text="edit.name"></span>
                                             </div>
                                             <div>
-                                                <div style="padding: 15px;">
+                                                <div style="padding: 15px; border-bottom: 1px solid var(--border);">
+                                                    <span>Perustiedot</span><br/>
+                                                    <small>
+                                                        Opiskelijan perustiedot.
+                                                    </small>
+                                                </div>
+                                                <div style="padding: 15px; border-bottom: 1px solid var(--border);">
                                                     <label for="name">Nimi:</label><br/>
                                                     <input x-model="edit.name"/><br/>
                                                     <label for="status">Tila:</label><br/>
@@ -737,7 +747,10 @@
                                                            type="date"/>
                                                 </div>
 
-                                                <!-- BLOAT!! -->
+                                                <div style="padding: 15px;">
+                                                    <span>Aikataulu</span><br/>
+                                                    <small>Luukas tee</small>
+                                                </div>
                                                 
                                                 <div class="schedule">
                                                     <div class="schedule-item"
@@ -938,10 +951,12 @@
                                                     </div>
                                                 </div>
                                                 
-                                                <!-- BLOAT!! -->
+                                                <div style="padding: 15px; border-bottom: 1px solid var(--border);">
+                                                    <span>Vapaapäivät (sinisellä)</span><br/>
+                                                    <small>Luukas tee</small>
+                                                </div>
                                                 
                                                 <div style="padding: 15px;">
-                                                    <label for="excluded_days">Vapaapäivät (sinisellä):</label><br/>
                                                     <calendar-component :holidays="edit.excluded_days" id="edit_calendar"
                                                                         :weekmask="edit.schedule">
                                                     </calendar-component>
@@ -1491,6 +1506,30 @@
 					const e = { schedule: schedule };
 					filterStudents(group_id).forEach(async function(student) {
 						const nstudent = { ...student, ...e };
+						const response = await fetch(`/api/students/${student.id}/`, {
+							method: "PUT",
+							headers: {
+								"Content-Type": "application/json",
+							},
+							body: JSON.stringify(nstudent),
+						});
+						if (!response.ok) {
+							const result = await response.json();
+							throw new Error(result.error);
+						}
+					});
+				} catch (error) {
+				    toast(capitalizeFirstLetter(error.message))
+					console.error(error.message);	
+				}
+			}
+
+			window.appendHolidaysAll = async function(group_id, holidays) {
+				try {
+					filterStudents(group_id).forEach(async function(student) {
+						const h = [...new Set(student.excluded_days.concat(holidays))];
+						const nh = { excluded_days: h };
+						const nstudent = { ...student, ...nh };
 						const response = await fetch(`/api/students/${student.id}/`, {
 							method: "PUT",
 							headers: {
