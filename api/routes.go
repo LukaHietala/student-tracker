@@ -49,6 +49,10 @@ func NewRouter(s *db.Store, h *websockets.Hub) *chi.Mux {
 			http.ServeFileFS(w, r, templateFs, "archive.html")
 		})
 
+		r.Get("/teachers", func(w http.ResponseWriter, r *http.Request) {
+			http.ServeFileFS(w, r, templateFs, "teachers.html")
+		})
+
 		r.Get("/logout", func(w http.ResponseWriter, r *http.Request) {
 			ResetJWTCookies(w)
 			http.Redirect(w, r, "/login", 303)
@@ -76,6 +80,7 @@ func NewRouter(s *db.Store, h *websockets.Hub) *chi.Mux {
 		r.Mount("/scans", scanResource{}.Routes())
 		r.Mount("/groups", groupsResource{}.Routes())
 		r.Mount("/teachers", teachersResource{}.Routes())
+		r.Mount("/session", sessionResource{}.Routes())
 	})
 
 	return r

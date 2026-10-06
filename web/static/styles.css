@@ -59,7 +59,18 @@ select {
 }
 
 a {
-    color: var(--primary)
+    color: var(--primary);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.navbar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
 }
 
 .small {

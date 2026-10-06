@@ -9,9 +9,13 @@
 	</head>
 	<body>
 		<main x-data="">
-            <nav>
-                <a href="/archive">Arkisto</a>
-                <a href="/logout">Kirjaudu ulos</a>
+            <nav class="navbar">
+                <span x-text="'Hei, ' + $store.state.session.name"></span>
+                <div>
+                    <a href="/archive">Arkisto</a>
+                    <a href="/teachers">Opettajat</a>
+                    <a href="/logout">Kirjaudu ulos</a>
+                </div>
             </nav>
 
 			<!-- Groups -->
@@ -398,7 +402,13 @@
                             <div class="editing-menu-title">
                                 <span>Lisää uusi opiskelija</span>
                             </div>
-                            <div style="padding: 15px;">
+                            <div style="padding: 15px; border-bottom: 1px solid var(--border);">
+                                <span>Perustiedot</span><br/>
+                                <small>
+                                    Opiskelijan perustiedot.
+                                </small>
+                            </div>
+                            <div style="padding: 15px; border-bottom: 1px solid var(--border);">
                                 <label for="name">Nimi:</label><br/>
                                 <input x-model="add_student.name"/><br/>
 								<label for="uid">Kortin UID:</label><br/>
@@ -422,8 +432,18 @@
                                        type="date"/><br/>
                             </div>
 
-                            <!-- BLOAT!! -->
-                            
+                            <div style="padding: 15px;">
+                                <span>Aikataulu</span><br/>
+                                <small>
+                                    Aikataulu määrittää
+                                    työajat viikonpäivä
+                                    kohtaisesti. Sillä voi
+                                    myös merkitä mitkä
+                                    päivät ovat aktiivisia
+                                    ja mitkä ei.
+                                </small>
+                            </div>
+
                             <div class="schedule">
                                 <div class="schedule-item"
                                      :class="add_student.schedule[0] == null ?
@@ -623,10 +643,18 @@
                                 </div>
                             </div>
                             
-                            <!-- BLOAT!! -->
+                            <div style="padding: 15px; border-bottom: 1px solid var(--border);">
+                                <span>Vapaapäivät (sinisellä)</span><br/>
+                                <small>
+                                    Vapaapäiville ei lasketa
+                                    työtunteja.
+                                    Vapaapäiviin kuulu myös
+                                    päivät, jotka eivät ole
+                                    aktiivisia aikataulussa.
+                                </small>
+                            </div>
                             
                             <div style="padding: 15px;">
-                                <label for="excluded_days">Vapaapäivät (sinisellä):</label><br/>
                                 <calendar-component :holidays="add_student.excluded_days" id="student_calendar"
                                                     :weekmask="add_student.schedule">
                                 </calendar-component>
@@ -736,10 +764,36 @@
                                                         <option value="IN">IN</option>
                                                         <option value="OUT">OUT</option>
                                                     </select><br/>
-                                                    <label for="done_seconds">Tehty työ:</label><br/>
-                                                    <!-- TODO: Luukas -->
-                                                    <label for="break_time">Tauko (per päivä)</label><br/>
-                                                    <!-- TODO: Luukas -->
+                                                    <label for="done_seconds">
+														Tehty työ:
+													</label><br/>
+													
+                                                    <button class="primary-btn"
+															x-on:click="edit.done_seconds -= 60*60"
+                                                            style="padding:4px 10px;">
+														-1 h
+													</button>
+													<button class="primary-btn"
+															x-on:click="edit.done_seconds -= 60*10"
+                                                            style="padding:4px 10px;">
+														-10 min
+													</button>
+													<span x-text="secondsToHuman(edit.done_seconds)"></span>
+													<button class="primary-btn"
+															x-on:click="edit.done_seconds += 60*10"
+                                                            style="padding:4px 10px;">
+														+10 min
+													</button>
+													<button class="primary-btn"
+															x-on:click="edit.done_seconds += 60*60"
+                                                            style="padding:4px 10px;">
+														+1 h
+													</button><br/>
+													
+                                                    <label for="break_time">
+														Tauko (per päivä) (sekuntteina)
+													</label><br/>
+													<input x-model.number="edit.break_time" type="number"/><br/>
                                                     <label for="start_date"> Aloitus päivä:</label><br/>
                                                     <input x-model="edit.start_date" type="date"/><br/>
                                                     <label for="start_date"> Lopetus päivä:</label><br/>
@@ -749,7 +803,14 @@
 
                                                 <div style="padding: 15px;">
                                                     <span>Aikataulu</span><br/>
-                                                    <small>Luukas tee</small>
+													<small>
+														Aikataulu määrittää
+														työajat viikonpäivä
+														kohtaisesti. Sillä voi
+														myös merkitä mitkä
+														päivät ovat aktiivisia
+														ja mitkä ei.
+													</small>
                                                 </div>
                                                 
                                                 <div class="schedule">
@@ -953,7 +1014,13 @@
                                                 
                                                 <div style="padding: 15px; border-bottom: 1px solid var(--border);">
                                                     <span>Vapaapäivät (sinisellä)</span><br/>
-                                                    <small>Luukas tee</small>
+                                                    <small>
+														Vapaapäiville ei lasketa
+														työtunteja.
+														Vapaapäiviin kuulu myös
+														päivät, jotka eivät ole
+														aktiivisia aikataulussa.
+													</small>
                                                 </div>
                                                 
                                                 <div style="padding: 15px;">
@@ -1142,7 +1209,6 @@
 				pairedDevices: [],
 				groups: [],
                 students: [],
-				teachers: [],
 
 				// Adding (GLOBAL REFERENCE TO LOCAL VARIABLE)
 				addingStudent: null,
@@ -1169,28 +1235,17 @@
 					name: "",
 				},
 
+                session: null,
+
 				async init() {
 					this.pairedDevices = await getPairedDevices();
 					this.groups = await getGroups();
                     this.students = await getStudents();
+                    this.session = await getSession()
 				},
 			});
 
 			const state = Alpine.store("state");
-			/*
-			 * /students (GET) - Lists students (all, not per group)
-			 * /students/{id} (GET,PUT,DELETE)
-			 * PUT requires the full student object
-			 * /students/archive (GET) - Lists all archived users
-			 * /students/archive/{id} (DELETE) - Full deletes the user, avoid
-			 * /groups (GET,POST) - List all groups and create one
-			 *
-			 * Students: https://github.com/LukaHietala/student-tracker/blob/master/api/students.go#L21
-			 * Groups: https://github.com/LukaHietala/student-tracker/blob/master/api/groups.go#L21
-			 * Devices: https://github.com/LukaHietala/student-tracker/blob/master/api/devices.go#L36
-			 * Scans: https://github.com/LukaHietala/student-tracker/blob/master/api/scans.go#L15
-			 * Teachers: https://github.com/LukaHietala/student-tracker/blob/master/api/teachers.go#L21
-			 */
 
 			window.defaultSchedule = [
 				{start: "08:00:00", end: "16:00:00"},
@@ -1237,21 +1292,6 @@
 				}
 			}
 
-			async function getTeachers() {
-				try {
-					const response = await fetch("/api/teachers");
-					if (!response.ok) {
-						const result = await response.json();
-						throw new Error(result.error);
-					}
-
-					return await response.json();
-				} catch (error) {
-                    toast(capitalizeFirstLetter(error.message))
-					console.error(error.message);
-				}
-			}
-
 			async function getPairedDevices() {
 				try {
 					const response = await fetch("/api/devices");
@@ -1266,6 +1306,21 @@
 					console.error(error.message);
 				}
 			}
+
+            async function getSession() {
+                try {
+					const response = await fetch("/api/session/self");
+					if (!response.ok) {
+						const result = await response.json();
+						throw new Error(result.error);
+					}
+
+					return await response.json();
+				} catch (error) {
+					toast(capitalizeFirstLetter(error.message))
+					console.error(error.message);
+				}
+            }
 
 			window.addGroup = async function(name) {
 				try {
@@ -1479,9 +1534,11 @@
 			}
 				
 			window.editDatesAll = async function(group_id, start_date, end_date) {
+                let updatedCount = 0;
+                let errors = [];
 				try {
 					const dates = {start_date: start_date, end_date: end_date};
-					filterStudents(group_id).forEach(async function(student) {
+					for (const student of filterStudents(group_id)) {
 						const nstudent = {...student, ...dates};
 						const response = await fetch(`/api/students/${student.id}/`, {
 							method: "PUT",
@@ -1492,19 +1549,32 @@
 						});
 						if (!response.ok) {
 							const result = await response.json();
-							throw new Error(result.error);
-						}
-					});
-				} catch (error) {
-				    toast(capitalizeFirstLetter(error.message))
+                            errors.push(result.error);
+                        } else {
+                            updatedCount++;
+                        }
+					}
+				} catch(error) {
+					toast(capitalizeFirstLetter(error.message))
 					console.error(error.message);	
-				}
+				} finally {
+					const message = 
+						  errors.length === 0
+						  ? `Päivitettiin ${updatedCount} oppilasta`
+						  : `Päivitettiin ${updatedCount} oppilasta (virheitä ${errors.length}):`
+                    toast(message)
+                    errors.forEach((err) => {
+                        console.log(err)
+                    })
+                }
 			}
 
 			window.editScheduleAll = async function(group_id, schedule) {
+                let updatedCount = 0;
+                let errors = [];
 				try {
 					const e = { schedule: schedule };
-					filterStudents(group_id).forEach(async function(student) {
+					for (const student of filterStudents(group_id)) {
 						const nstudent = { ...student, ...e };
 						const response = await fetch(`/api/students/${student.id}/`, {
 							method: "PUT",
@@ -1515,18 +1585,32 @@
 						});
 						if (!response.ok) {
 							const result = await response.json();
-							throw new Error(result.error);
-						}
-					});
+                            errors.push(result.error)
+                        } else {
+                            updatedCount++;
+                        }
+					}
 				} catch (error) {
 				    toast(capitalizeFirstLetter(error.message))
 					console.error(error.message);	
-				}
+				} finally {
+                    const message = 
+                        errors.length === 0
+                        ? `Päivitettiin ${updatedCount} oppilasta`
+                        : `Päivitettiin ${updatedCount} oppilasta (virheitä ${errors.length})`
+                    toast(message)
+                    errors.forEach((err) => {
+                        // TODO: display errors sensibly
+                        console.log(err)
+                    })
+                }
 			}
 
 			window.appendHolidaysAll = async function(group_id, holidays) {
+                let updatedCount = 0;
+                let errors = [];
 				try {
-					filterStudents(group_id).forEach(async function(student) {
+					for (const student of filterStudents(group_id)) {
 						const h = [...new Set(student.excluded_days.concat(holidays))];
 						const nh = { excluded_days: h };
 						const nstudent = { ...student, ...nh };
@@ -1537,15 +1621,27 @@
 							},
 							body: JSON.stringify(nstudent),
 						});
-						if (!response.ok) {
+                        if (!response.ok) {
 							const result = await response.json();
-							throw new Error(result.error);
-						}
-					});
+                            errors.push(result.error)
+                        } else {
+                            updatedCount++;
+                        }
+					}
 				} catch (error) {
 				    toast(capitalizeFirstLetter(error.message))
 					console.error(error.message);	
-				}
+				} finally {
+                    const message = 
+                        errors.length === 0
+                        ? `Päivitettiin ${updatedCount} oppilasta`
+                        : `Päivitettiin ${updatedCount} oppilasta (virheitä ${errors.length})`
+                    toast(message)
+                    errors.forEach((err) => {
+                        // TODO: display errors sensibly
+                        console.log(err)
+                    })
+                }
 			}
 
 			const wsUri = "ws://10.246.12.118:3000/ws";
@@ -1566,11 +1662,10 @@
                     }
 
                     const student = state.students.find((student) => student.id === scan.student_id);
-                    if (student) {
+                    if (student)
                         toast(`Uusi skannaus: ${student.name}`);
-                    } else {
-                        console.error("Scan student_id not found in students")
-                    }
+					else
+                        console.error("Scan student_id not found in students")					
                     break;
 				case "student:new":
 					state.students.push(message.payload);
@@ -1579,6 +1674,13 @@
                     const updatedStudent = message.payload;
 					const ref = state.students[state.students.findIndex((student) => student.id === updatedStudent.id)];
 					modify(ref, updatedStudent);
+
+					// Update state in edit menu
+					if (state.editingStudent != null) {
+						if (state.editingStudent.id == updatedStudent.id)
+							state.editingStudent.status = updatedStudent.status;
+					}
+					
                     break;
                 case "student:archive":
                     const archivedStudent = message.payload;

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+		<script type="text/javascript" src="/static/utils.js"></script>
+        <link rel="stylesheet" type="text/css" href="/static/styles.css">
+		<title>Opettajat</title>
+	</head>
+	<body x-data="">
+		<template x-if="$store.state.session != null">
+			<main>
+				<nav class="navbar">
+					<span x-text="'Hei, ' + $store.state.session.name"></span>
+					<div>
+						<a href="/">Pääsivu</a>
+						<a href="/archive">Arkisto</a>
+						<a href="/logout">Kirjaudu ulos</a>
+					</div>
+				</nav>
+
+				<h3>Opettajat</h3>
+				<button class="primary-btn"
+						x-on:click="$store.state.addingTeacher = {}">
+					Lisää opettaja
+				</button>
+				<div class="list">
+					<!-- Adding -->
+					<template x-if="$store.state.addingTeacher != null">
+						<div class="editing-menu">
+							<div class="editing-menu-title">
+								<span>jio</span>
+							</div>
+							<div class="editing-menu-form">
+								<label for="name">Nimi:</label>
+								<input name="name" x-model="$store.state.addingTeacher.name"/><br/>
+								<label for="password_plain">Salasana:</label>
+								<input name="password_plain" x-model="$store.state.addingTeacher.password_plain"/><br/>
+							</div>
+							<div class="editing-menu-actions">
+								<button class="primary-btn"
+										x-on:click="await addTeacher();
+													$store.state.addingTeacher =
+													null">
+									Lisää opettaja
+								</button>
+							</div>
+						</div>
+					</template>
+					<!-- Teachers -->
+					<template x-for="teacher in $store.state.teachers">
+						<div class="multi-item-container">
+							<div class="item">
+								<div>
+									<span x-text="teacher.name"></span>
+								</div>
+								<div class="item-actions">
+									<button
+										class="icon-btn"
+										x-on:click="if ($store.state.editingTeacher)
+													$store.state.editingTeacher = null
+													else
+													$store.state.editingTeacher = JSON.parse(JSON.stringify(teacher))">
+										<img src="/static/pen.svg" alt="Muokkaa"/>
+									</button>
+									<div x-data="{ confirm: false }">
+										<button x-show="!confirm"
+												class="icon-btn"
+												:disabled="teacher.id == $store.state.session.id"
+												x-on:click="confirm = true">
+											<img src="/static/can.svg" alt="Poista"/>
+										</button>
+										<button x-show="confirm"
+												class="icon-btn"
+												x-on:click="confirm = false">
+											Peru
+										</button>
+										<button x-show="confirm"
+												class="icon-btn"
+												x-on:click="confirm = false">
+											Varmista
+										</button>
+									</div>
+								</div>
+							</div>
+							<!-- Muokkaus -->
+							<template x-if=
+									  "$store.state.editingTeacher != null &&
+									   teacher.id == $store.state.editingTeacher.id">
+								<div class="editing-menu"
+									 x-data="{ edit: $store.state.editingTeacher }">
+									<div class="editing-menu-title">
+										<span>
+											Q: Luukas mitä muokataan
+											A: koiria
+										</span>
+									</div>
+									<div class="editing-menu-form">
+										<label for="name">Nimi:</label>
+										<input name="name" x-model="edit.name"/><br/>
+										<label for="password_plain">Salasana:</label>
+										<input name="password_plain" x-model="edit.password_plain"/><br/>
+									</div>
+									<div class="editing-menu-actions">
+										<button class="primary-btn">Muokkaa opettajaa</button>
+									</div>
+								</div>
+							</template>
+						</div>
+					</template>
+				</div>
+			</main>
+		</template>
+	</body>
+	<script>
+		document.addEventListener("alpine:init", async () => {
+			Alpine.store('state', {
+				session: null,
+				
+				teachers: [],
+
+				addingTeacher: null,
+				
+				editingTeacher: null,
+
+				async init() {
+					this.teachers = await getTeachers()
+                    this.session = await getSession()
+				},
+			});
+			const state = Alpine.store("state");
+
+			async function getTeachers() {
+				try {
+					const response = await fetch("/api/teachers");
+					if (!response.ok) {
+						const result = await response.json();
+						throw new Error(result.error);
+					}
+
+					return await response.json();
+				} catch (error) {
+					toast(capitalizeFirstLetter(error.message))
+					console.error(error.message);
+				}
+			}
+
+			window.addTeacher = async () => {
+				try {
+                    const response = await fetch(`/api/teachers`, {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify(state.addingTeacher),
+					});
+					if (!response.ok) {
+						const result = await response.json();
+						throw new Error(result.error);
+					}
+                    toast(`Lisättiin opettaja ${state.addingTeacher.name}`);
+					state.teachers = await getTeachers();
+				} catch (error) {
+                    toast(capitalizeFirstLetter(error.message))
+					console.error(error.message);
+				}
+			}
+
+            async function getSession() {
+                try {
+					const response = await fetch("/api/session/self");
+					if (!response.ok) {
+						const result = await response.json();
+						throw new Error(result.error);
+					}
+
+					return await response.json();
+				} catch (error) {
+					toast(capitalizeFirstLetter(error.message));
+					console.error(error.message);
+				}
+            }
+		});
+	</script>
+</html>

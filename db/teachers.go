@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 
+	"github.com/go-chi/jwtauth/v5"
+	"github.com/lestrrat-go/jwx/v3/jwt"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -84,9 +86,22 @@ func (s *Store) UpdateTeacher(ctx context.Context, id int, teacher *Teacher) err
 	query := `
 		UPDATE teachers
 		SET name = ?
+			password_hash = ?
 		WHERE id = ?
     `
-	_, err := s.db.ExecContext(ctx, query, teacher.Name, id)
+
+	var hash string
+	var err error
+	if teacher.PasswordPlain == "" {
+		hash = teacher.PasswordHash
+	} else {
+		hash, err = hashPassword(teacher.PasswordPlain)
+	}
+	if err != nil {
+		return err
+	}
+
+	_, err = s.db.ExecContext(ctx, query, teacher.Name, hash, id)
 
 	if err != nil {
 		return err
@@ -138,6 +153,36 @@ func (s *Store) VerifyTeacher(name, password string) (int, error) {
 	} else {
 		return 0, fmt.Errorf("wrong password")
 	}
+}
+
+func (s *Store) GetSelf(ctx context.Context) (*Teacher, error) {
+	token, claims, _ := jwtauth.FromContext(ctx)
+
+	if token == nil || jwt.Validate(token) != nil {
+		return nil, fmt.Errorf("unable to validate teacher token")
+	}
+	teacherIDFloat, ok := claims["teacher_id"].(float64)
+	if !ok {
+		return nil, fmt.Errorf("unable to convert teacher_id to float")
+	}
+
+	query := `
+		SELECT id, name
+		FROM teachers
+		WHERE id = ?
+		LIMIT 1
+	`
+
+	t := new(Teacher)
+	err := s.db.QueryRowContext(ctx, query, int(teacherIDFloat)).Scan(&t.ID, &t.Name)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return t, nil
 }
 
 func hashPassword(password string) (string, error) {

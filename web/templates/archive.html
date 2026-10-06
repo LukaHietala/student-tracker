@@ -9,10 +9,15 @@
 	</head>
 	<body>
         <main x-data="">
-			<nav>
-                <a href="/">Pääsivu</a>
-				<a href="/logout">Kirjaudu ulos</a>
-			</nav>
+            <nav class="navbar">
+                <span x-text="'Hei, ' + $store.state.session.name"></span>
+                <div>
+                    <a href="/">Pääsivu</a>
+                    <a href="/teachers">Opettajat</a>
+                    <a href="/logout">Kirjaudu ulos</a>
+                </div>
+            </nav>
+
 			<h3>Arkistoidut oppilaat</h3>
 			<div class="list">
 				<div x-show="$store.state.archivedStudents.length == 0" class="item">
@@ -112,8 +117,11 @@
 				// Adding (GLOBAL REFERENCE TO LOCAL VARIABLE)
 				addingStudent: null,
 
+                session: null,
+
 				async init() {
 					this.archivedStudents = await getArchivedStudents()
+                    this.session = await getSession()
 				},
 			});
 
@@ -132,6 +140,21 @@
 					console.error(error.message);
 				}
 			};
+
+            async function getSession() {
+                try {
+					const response = await fetch("/api/session/self");
+					if (!response.ok) {
+						const result = await response.json();
+						throw new Error(result.error);
+					}
+
+					return await response.json();
+				} catch (error) {
+					toast(capitalizeFirstLetter(error.message))
+					console.error(error.message);
+				}
+            }
 
 			window.getScans = async function(student_id) {
 				try {
