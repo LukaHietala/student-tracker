@@ -21,16 +21,23 @@
 				</nav>
 
 				<h3>Opettajat</h3>
-				<button class="primary-btn"
-						x-on:click="$store.state.addingTeacher = {}">
-					Lisää opettaja
-				</button>
 				<div class="list">
+                    <div class="item">
+                        <div></div>
+                        <button class="primary-btn"
+								x-on:click="if ($store.state.addingTeacher == null)
+											$store.state.addingTeacher = {}
+											else
+											$store.state.addingTeacher = null">
+                            Lisää opettaja
+                        </button>
+                    </div>
+
 					<!-- Adding -->
 					<template x-if="$store.state.addingTeacher != null">
 						<div class="editing-menu">
 							<div class="editing-menu-title">
-								<span>jio</span>
+								<span>Lisätään uusi opettaja</span>
 							</div>
 							<div class="editing-menu-form">
 								<label for="name">Nimi:</label>
@@ -103,7 +110,8 @@
 										<input name="password_plain" x-model="edit.password_plain"/><br/>
 									</div>
 									<div class="editing-menu-actions">
-										<button class="primary-btn">Muokkaa opettajaa</button>
+										<button class="primary-btn"
+												x-on:click="editTeacher()">Muokkaa</button>
 									</div>
 								</div>
 							</template>
@@ -142,6 +150,26 @@
 					return await response.json();
 				} catch (error) {
 					toast(capitalizeFirstLetter(error.message))
+					console.error(error.message);
+				}
+			}
+
+			window.editTeacher = async function() {
+				try {
+					const response = await fetch(`/api/teachers/${state.editingTeacher.id}/`, {
+						method: "PUT",
+						headers: {
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify(state.editingTeacher),
+					});
+					if (!response.ok) {
+						const result = await response.json();
+						throw new Error(result.error);
+					}
+                    toast(`Muokattiin opettajaa ${state.editingTeacher.name}`)
+				} catch (error) {
+                    toast(capitalizeFirstLetter(error.message))
 					console.error(error.message);
 				}
 			}

@@ -85,7 +85,7 @@ func (s *Store) FindTeacherByID(ctx context.Context, id int) (*Teacher, error) {
 func (s *Store) UpdateTeacher(ctx context.Context, id int, teacher *Teacher) error {
 	query := `
 		UPDATE teachers
-		SET name = ?
+		SET name = ?,
 			password_hash = ?
 		WHERE id = ?
     `
