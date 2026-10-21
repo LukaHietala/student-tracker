@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
 	<head>
 		<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -8,15 +8,15 @@
 		<title>Arkisto</title>
 	</head>
 	<body>
-        <main x-data="">
-            <nav class="navbar">
-                <span x-text="'Hei, ' + $store.state.session.name"></span>
-                <div>
-                    <a href="/">Pääsivu</a>
-                    <a href="/teachers">Opettajat</a>
-                    <a href="/logout">Kirjaudu ulos</a>
-                </div>
-            </nav>
+		<main x-data="">
+			<nav class="navbar">
+				<span x-text="'Hei, ' + $store.state.session.name"></span>
+				<div>
+					<a href="/">Pääsivu</a>
+					<a href="/teachers">Opettajat</a>
+					<a href="/api/auth/logout">Kirjaudu ulos</a>
+				</div>
+			</nav>
 
 			<h3>Arkistoidut oppilaat</h3>
 			<div class="list">
@@ -24,11 +24,13 @@
 					Ei arkistoituja opiskelijoita.
 				</div>
 				<template x-for="student in $store.state.archivedStudents">
-					<div class="multi-item-container"
-						 x-data="{
+					<div
+						class="multi-item-container"
+						x-data="{
 								 retrieving: false,
 								 scans: null
-								 }">
+								 }"
+					>
 						<div class="item">
 							<div>
 								<span x-text="student.name"></span>
@@ -37,22 +39,25 @@
 								- Luotu:
 								<span x-text="student.created_at"></span>
 							</div>
-                            <div class="item-actions">
-                                <button class="icon-btn"
-                                    title="Näytä logit"
-                                    x-on:click="if (scans==null)
+							<div class="item-actions">
+								<button
+									class="icon-btn"
+									title="Näytä logit"
+									x-on:click="if (scans==null)
                                     scans = await getScans(student.id)
                                     else
-                                    scans = null">
-                                    Skannaukset
-                                </button>
-                            </div>
+                                    scans = null"
+								>
+									Skannaukset
+								</button>
+							</div>
 						</div>
 						<!-- Scan log -->
 						<template x-if="scans != null">
 							<div>
-								<div class="inline-list"
-									 x-data="{
+								<div
+									class="inline-list"
+									x-data="{
 											 filter_start: '',
 											 filter_end: '',
 											 
@@ -76,31 +81,22 @@
 											 (this.filter_start == '' &&
 											 this.filter_end == '')
 											 )}
-											 }">
-                                    <div class="inline-list-filter"> 
-                                        <label for="start_date"> Aloitus päivä:</label>
-                                        <input x-model="filter_start" type="date"/>
-                                        <label for="start_date"> Lopetus päivä:</label>
-                                        <input x-model="filter_end"
-                                               type="date"/>
-                                    </div>
+											 }"
+								>
+									<div class="inline-list-filter">
+										<label for="start_date"> Aloitus päivä:</label>
+										<input x-model="filter_start" type="date" />
+										<label for="start_date"> Lopetus päivä:</label>
+										<input x-model="filter_end" type="date" />
+									</div>
 									<template x-for="scan in filtered_scans">
 										<div class="inline-item">
-											<span x-text="scan.timestamp">
-											</span> - 
-											<span x-show="scan.new_status=='IN'">
-												Skannattiin sisään
-											</span>
-											<span x-show="scan.new_status=='OUT'">
-												Skannattiin ulos
-											</span>
+											<span x-text="scan.timestamp"> </span> -
+											<span x-show="scan.new_status=='IN'"> Skannattiin sisään </span>
+											<span x-show="scan.new_status=='OUT'"> Skannattiin ulos </span>
 										</div>
 									</template>
-									<div
-										style="padding: 15px;"
-										x-show="filtered_scans.length == 0">
-										Ei skannauksia
-									</div>
+									<div style="padding: 15px" x-show="filtered_scans.length == 0">Ei skannauksia</div>
 								</div>
 							</div>
 						</template>
@@ -117,11 +113,11 @@
 				// Adding (GLOBAL REFERENCE TO LOCAL VARIABLE)
 				addingStudent: null,
 
-                session: null,
+				session: null,
 
 				async init() {
-					this.archivedStudents = await getArchivedStudents()
-                    this.session = await getSession()
+					this.archivedStudents = await getArchivedStudents();
+					this.session = await getSession();
 				},
 			});
 
@@ -139,10 +135,10 @@
 					toast(capitalizeFirstLetter(error.message));
 					console.error(error.message);
 				}
-			};
+			}
 
-            async function getSession() {
-                try {
+			async function getSession() {
+				try {
 					const response = await fetch("/api/session/self");
 					if (!response.ok) {
 						const result = await response.json();
@@ -151,24 +147,24 @@
 
 					return await response.json();
 				} catch (error) {
-					toast(capitalizeFirstLetter(error.message))
+					toast(capitalizeFirstLetter(error.message));
 					console.error(error.message);
 				}
-            }
+			}
 
-			window.getScans = async function(student_id) {
+			window.getScans = async function (student_id) {
 				try {
-                    const response = await fetch(`/api/scans/student/${student_id}`);
+					const response = await fetch(`/api/scans/student/${student_id}`);
 					if (!response.ok) {
 						const result = await response.json();
 						throw new Error(result.error);
 					}
 					return await response.json();
 				} catch (error) {
-                    toast(capitalizeFirstLetter(error.message))
+					toast(capitalizeFirstLetter(error.message));
 					console.error(error.message);
 				}
-			}
+			};
 		});
 	</script>
 </html>

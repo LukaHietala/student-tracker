@@ -4,18 +4,23 @@ import (
 	"context"
 	"crypto/rand"
 	"database/sql"
+	"errors"
 	"fmt"
+)
+
+var (
+	ErrDeviceNotFound = errors.New("device not found")
 )
 
 func (s *Store) AddDevice(ctx context.Context, device *Device) error {
 	query := `
-        INSERT INTO devices (name, mac_addr, secret_key, ipv4_addr, is_online)
-        VALUES (?,?,?,?,?)
+        INSERT INTO devices (name, secret_key)
+        VALUES (?,?)
     `
 
 	// TODO: Make sure it's unique
 	secret := randomKey(12)
-	res, err := s.db.ExecContext(ctx, query, device.Name, device.MacAddr, secret, device.IPv4Addr, device.Online)
+	res, err := s.db.ExecContext(ctx, query, device.Name, secret)
 	if err != nil {
 		return err
 	}
@@ -32,7 +37,7 @@ func (s *Store) AddDevice(ctx context.Context, device *Device) error {
 
 func (s *Store) ListDevices(ctx context.Context) ([]*Device, error) {
 	query := `
-		SELECT id, name, mac_addr, secret_key, ipv4_addr, is_online
+		SELECT id, name, secret_key
 		FROM devices
 	`
 
@@ -42,10 +47,10 @@ func (s *Store) ListDevices(ctx context.Context) ([]*Device, error) {
 	}
 	defer rows.Close()
 
-	devices := make([]*Device, 0)
+	var devices []*Device
 	for rows.Next() {
 		dev := &Device{}
-		err := rows.Scan(&dev.ID, &dev.Name, &dev.MacAddr, &dev.SecretKey, &dev.IPv4Addr, &dev.Online)
+		err := rows.Scan(&dev.ID, &dev.Name, &dev.SecretKey)
 		if err != nil {
 			return nil, err
 		}
@@ -57,31 +62,30 @@ func (s *Store) ListDevices(ctx context.Context) ([]*Device, error) {
 
 func (s *Store) FindDeviceByID(ctx context.Context, id int) (*Device, error) {
 	query := `
-		SELECT id, name, mac_addr, secret_key, ipv4_addr, is_online
+		SELECT id, name, secret_key
 		FROM devices
-		WHERE id = ? LIMIT 1`
+		WHERE id = ? LIMIT 1
+	`
 
 	var dev Device
-	err := s.db.QueryRowContext(ctx, query, id).Scan(&dev.ID, &dev.Name, &dev.MacAddr, &dev.SecretKey, &dev.IPv4Addr, &dev.Online)
+	err := s.db.QueryRowContext(ctx, query, id).Scan(&dev.ID, &dev.Name, &dev.SecretKey)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, fmt.Errorf("%w; id: %d", ErrDeviceNotFound, id)
+	}
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, fmt.Errorf("no device found based on id: %d", id)
-		}
 		return nil, err
 	}
 
 	return &dev, nil
 }
 
-func (s *Store) UpdateDevice(ctx context.Context, id int, device Device) error {
+func (s *Store) UpdateDevice(ctx context.Context, device *Device) error {
 	query := `
         UPDATE devices
-		SET name = ?,
-   			secret_key = ?,
-			is_online = ?
+		SET name = ?
 		WHERE id = ?
     `
-	_, err := s.db.ExecContext(ctx, query, device.Name, device.SecretKey, device.Online, id)
+	_, err := s.db.ExecContext(ctx, query, device.Name, device.ID)
 	if err != nil {
 		return err
 	}

@@ -82,7 +82,7 @@ func (s *Store) FindTeacherByID(ctx context.Context, id int) (*Teacher, error) {
 	return &teacher, nil
 }
 
-func (s *Store) UpdateTeacher(ctx context.Context, id int, teacher *Teacher) error {
+func (s *Store) UpdateTeacher(ctx context.Context, teacher *Teacher) error {
 	query := `
 		UPDATE teachers
 		SET name = ?,
@@ -101,13 +101,11 @@ func (s *Store) UpdateTeacher(ctx context.Context, id int, teacher *Teacher) err
 		return err
 	}
 
-	_, err = s.db.ExecContext(ctx, query, teacher.Name, hash, id)
+	_, err = s.db.ExecContext(ctx, query, teacher.Name, hash, teacher.ID)
 
 	if err != nil {
 		return err
 	}
-
-	teacher.ID = id
 
 	return nil
 }
@@ -136,7 +134,7 @@ func (s *Store) TeacherCount() (int, error) {
 	return count, nil
 }
 
-func (s *Store) VerifyTeacher(name, password string) (int, error) {
+func (s *Store) VerifyTeacher(context context.Context, name, password string) (int, error) {
 	teacher := new(Teacher)
 	row := s.db.QueryRow("SELECT id, name, password_hash FROM teachers WHERE name = ?", name)
 	err := row.Scan(&teacher.ID, &teacher.Name, &teacher.PasswordHash)

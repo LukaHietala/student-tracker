@@ -14,8 +14,8 @@ import (
 	"net"
 	"time"
 
-	"github.com/lukahietala/rfid/db"
-	"github.com/lukahietala/rfid/websockets"
+	"github.com/lukahietala/rfid/internal/db"
+	"github.com/lukahietala/rfid/internal/websockets"
 )
 
 const (
@@ -195,11 +195,7 @@ func (s *Server) handleScan(ctx context.Context, uidStr string, timestamp int64)
 		student.Status = "IN"
 	}
 
-	if err := student.Validate(); err != nil {
-		return err
-	}
-
-	if err := s.store.UpdateStudent(ctx, student.ID, student); err != nil {
+	if err := s.store.UpdateStudent(ctx, student); err != nil {
 		return err
 	}
 

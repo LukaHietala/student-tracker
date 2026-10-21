@@ -181,7 +181,7 @@ func (s *Store) FindStudentByUID(ctx context.Context, uid string) (*Student, err
 	return &st, nil
 }
 
-func (s *Store) UpdateStudent(ctx context.Context, id int, student *Student) error {
+func (s *Store) UpdateStudent(ctx context.Context, student *Student) error {
 	query := `
 		UPDATE students
 		SET uid = ?,
@@ -197,7 +197,7 @@ func (s *Store) UpdateStudent(ctx context.Context, id int, student *Student) err
 	_, err := s.db.ExecContext(
 		ctx, query,
 		student.UID, student.Status, student.Name, student.StartDate, student.EndDate,
-		student.Schedule, student.ExcludedDays, student.BreakTime, id,
+		student.Schedule, student.ExcludedDays, student.BreakTime, student.ID,
 	)
 
 	if err != nil {
@@ -208,7 +208,6 @@ func (s *Store) UpdateStudent(ctx context.Context, id int, student *Student) err
 	if err != nil {
 		return err
 	}
-	student.ID = id
 	student.Remaining = remaining
 
 	return nil

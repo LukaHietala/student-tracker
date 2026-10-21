@@ -10,30 +10,31 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/lukahietala/rfid/api"
-	"github.com/lukahietala/rfid/db"
-	"github.com/lukahietala/rfid/services"
-	"github.com/lukahietala/rfid/tcp"
-	"github.com/lukahietala/rfid/websockets"
-	"github.com/lukahietala/rfid/workers"
+	"github.com/lukahietala/rfid/internal/api"
+	"github.com/lukahietala/rfid/internal/auth"
+	"github.com/lukahietala/rfid/internal/db"
+	"github.com/lukahietala/rfid/internal/services"
+	"github.com/lukahietala/rfid/internal/tcp"
+	"github.com/lukahietala/rfid/internal/websockets"
+	"github.com/lukahietala/rfid/internal/workers"
 )
 
 func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	conn, err := db.Connect()
+	conn, err := db.Connect("student_tracker.db?_journal_mode=WAL&_foreign_keys=on&_busy_timeout=5000")
 	if err != nil {
 		log.Fatalf("failed to connect to db: %v", err)
 	}
 	defer conn.Close()
-	store := db.NewStore(conn)
 
+	store := db.NewStore(conn)
 	hub := websockets.NewHub()
+
 	go hub.Run()
 
 	go workers.StartDoneTicker(ctx, store, hub, 10*time.Second)
-	go workers.StartDevicePingTicker(ctx, store, 10*time.Second)
 
 	rfidSrv := tcp.New(":5000", store, hub)
 	go func() {
@@ -47,12 +48,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	api.InitAuth(cfg.JWTSecret)
+	authService := auth.New(cfg.JWTSecret, store)
+	handler := api.NewHandler(store, authService, hub)
 
-	router := api.NewRouter(store, hub)
 	httpServer := &http.Server{
 		Addr:    ":3000",
-		Handler: router,
+		Handler: handler,
 	}
 
 	go func() {

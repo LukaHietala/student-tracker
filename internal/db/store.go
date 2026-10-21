@@ -49,14 +49,9 @@ var schema = `
 	CREATE TABLE IF NOT EXISTS devices (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name TEXT NOT NULL,
-		mac_addr TEXT NOT NULL,
-		secret_key TEXT NOT NULL,
-		ipv4_addr TEXT NOT NULL,
-		is_online BOOL NOT NULL DEFAULT FALSE
+		secret_key TEXT NOT NULL
 	);
 `
-
-// TODO: foreing keys
 
 type Store struct {
 	db *sql.DB
@@ -66,13 +61,12 @@ func NewStore(db *sql.DB) *Store {
 	return &Store{db: db}
 }
 
-func Connect() (*sql.DB, error) {
-	db, err := sql.Open("sqlite3", ":memory:?_journal_mode=WAL&_foreign_keys=on")
+func Connect(dsn string) (*sql.DB, error) {
+	db, err := sql.Open("sqlite3", dsn)
 	if err != nil {
 		return nil, err
 	}
 
-	// TODO: Remove when moving away from memory
 	db.SetMaxOpenConns(1)
 
 	if err = db.Ping(); err != nil {

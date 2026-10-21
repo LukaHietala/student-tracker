@@ -3,7 +3,12 @@ package db
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
+)
+
+var (
+	ErrGroupNotFound = errors.New("group not found")
 )
 
 func (s *Store) AddGroup(ctx context.Context, group *Group) error {
@@ -11,6 +16,7 @@ func (s *Store) AddGroup(ctx context.Context, group *Group) error {
         INSERT INTO groups (name)
         VALUES (?)
     `
+
 	res, err := s.db.ExecContext(ctx, query, group.Name)
 	if err != nil {
 		return err
@@ -43,7 +49,7 @@ func (s *Store) ListGroups(ctx context.Context, archived bool) ([]*Group, error)
 	}
 	defer rows.Close()
 
-	groups := make([]*Group, 0)
+	var groups []*Group
 	for rows.Next() {
 		g := &Group{}
 		err := rows.Scan(
@@ -68,29 +74,27 @@ func (s *Store) FindGroupByID(ctx context.Context, id int) (*Group, error) {
 
 	var group Group
 	err := s.db.QueryRowContext(ctx, query, id).Scan(&group.ID, &group.Name, &group.IsArchived, &group.CreatedAt)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, fmt.Errorf("%w; %d", ErrGroupNotFound, id)
+	}
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, fmt.Errorf("no group found based on id: %d", id)
-		}
 		return nil, err
 	}
 
 	return &group, nil
 }
 
-func (s *Store) UpdateGroup(ctx context.Context, id int, group *Group) error {
+func (s *Store) UpdateGroup(ctx context.Context, group *Group) error {
 	query := `
 		UPDATE groups
 		SET name = ?
 		WHERE id = ?
     `
-	_, err := s.db.ExecContext(ctx, query, group.Name, id)
+	_, err := s.db.ExecContext(ctx, query, group.Name, group.ID)
 
 	if err != nil {
 		return err
 	}
-
-	group.ID = id
 
 	return nil
 }
@@ -218,7 +222,7 @@ func (s *Store) ListGroupStudents(ctx context.Context, archived bool, groupID in
 	}
 	defer rows.Close()
 
-	students := make([]*Student, 0)
+	var students []*Student
 	for rows.Next() {
 		st := &Student{}
 		err := rows.Scan(
