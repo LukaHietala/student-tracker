@@ -79,6 +79,25 @@ func (s *Store) FindDeviceByID(ctx context.Context, id int) (*Device, error) {
 	return &dev, nil
 }
 
+func (s *Store) FindDeviceBySecret(ctx context.Context, secret string) (*Device, error) {
+	query := `
+		SELECT id, name, secret_key
+		FROM devices
+		WHERE secret_key = ? LIMIT 1
+	`
+
+	var dev Device
+	err := s.db.QueryRowContext(ctx, query, secret).Scan(&dev.ID, &dev.Name, &dev.SecretKey)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, fmt.Errorf("%w; secret: %s", ErrDeviceNotFound, secret)
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	return &dev, nil
+}
+
 func (s *Store) UpdateDevice(ctx context.Context, device *Device) error {
 	query := `
         UPDATE devices

@@ -16,7 +16,6 @@ var schema = `
 	CREATE TABLE IF NOT EXISTS groups (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
-		is_archived BOOL NOT NULL DEFAULT FALSE,
         created_at TEXT NOT NULL DEFAULT (datetime(current_timestamp, 'localtime'))
 	);
 

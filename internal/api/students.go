@@ -83,6 +83,9 @@ func (s *StudentRequest) Bind(r *http.Request) error {
 	if utf8.RuneCountInString(s.Name) > 50 {
 		return errors.New("student name is too long (max 50)")
 	}
+	if utf8.RuneCountInString(s.Name) < 3 {
+		return errors.New("student name is too short (min 3)")
+	}
 
 	if s.Status == "" {
 		s.Status = "OUT"

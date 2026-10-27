@@ -14,7 +14,6 @@ import (
 	"github.com/lukahietala/rfid/internal/auth"
 	"github.com/lukahietala/rfid/internal/db"
 	"github.com/lukahietala/rfid/internal/services"
-	"github.com/lukahietala/rfid/internal/tcp"
 	"github.com/lukahietala/rfid/internal/websockets"
 	"github.com/lukahietala/rfid/internal/workers"
 )
@@ -36,13 +35,6 @@ func main() {
 
 	go workers.StartDoneTicker(ctx, store, hub, 10*time.Second)
 
-	rfidSrv := tcp.New(":5000", store, hub)
-	go func() {
-		if err := rfidSrv.Start(ctx); err != nil {
-			log.Printf("failed to start rfid card server: %v", err)
-		}
-	}()
-
 	cfg, err := services.LoadEnv()
 	if err != nil {
 		log.Fatal(err)
@@ -57,9 +49,10 @@ func main() {
 	}
 
 	go func() {
-		log.Printf("http server listening on %s", httpServer.Addr)
-		if err := httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Fatalf("failed to start http server: %v", err)
+		log.Printf("listening on %s", httpServer.Addr)
+		err := httpServer.ListenAndServe()
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatal(err)
 		}
 	}()
 
@@ -68,7 +61,6 @@ func main() {
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	rfidSrv.Close()
 	if err := httpServer.Shutdown(shutdownCtx); err != nil {
 		log.Println(err)
 	}

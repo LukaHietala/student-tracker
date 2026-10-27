@@ -1,10 +1,23 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
 	<head>
-		<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-		<script type="text/javascript" src="/static/calendar.js"></script>
-		<script type="text/javascript" src="/static/utils.js"></script>
-		<link rel="stylesheet" type="text/css" href="/static/styles.css" />
+		<script
+			defer
+			src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+		></script>
+		<script
+			type="text/javascript"
+			src="/static/calendar.js"
+		></script>
+		<script
+			type="text/javascript"
+			src="/static/utils.js"
+		></script>
+		<link
+			rel="stylesheet"
+			type="text/css"
+			href="/static/styles.css"
+		/>
 		<title>Etusivu</title>
 	</head>
 	<body>
@@ -23,22 +36,40 @@
 			<!-- Groups -->
 			<h3>Ryhmät</h3>
 			<div class="list">
-				<div x-data="{ adding: false }" class="list">
+				<div
+					x-data="{ adding: false }"
+					class="list"
+				>
 					<div class="item">
 						<div>
-							<span x-text="$store.state.groups.length <= 0 ? 'Ei ryhmiä' : ''"></span>
+							<span
+								x-text="$store.state.groups.length <= 0 ? 'Ei ryhmiä' : ''"
+							></span>
 						</div>
 						<div class="item-actions">
-							<button class="primary-btn" x-on:click="adding = !adding">Lisää ryhmä</button>
+							<button
+								class="primary-btn"
+								x-on:click="adding = !adding"
+							>
+								Lisää ryhmä
+							</button>
 						</div>
 					</div>
-					<div class="editing-menu" x-show="adding" x-data="{ add_name:'' }">
+					<div
+						class="editing-menu"
+						x-show="adding"
+						x-data="{ add_name:'' }"
+					>
 						<div class="editing-menu-title">
 							<span>Lisää uusi ryhmä</span>
 						</div>
 						<div style="padding: 15px">
 							<label for="name">Nimi:</label>
-							<input type="text" name="name" x-model="add_name" />
+							<input
+								type="text"
+								name="name"
+								x-model="add_name"
+							/>
 						</div>
 						<div class="editing-menu-actions">
 							<button
@@ -73,7 +104,10 @@
 						<div class="item">
 							<span x-text="group.name"></span>
 							<div class="item-actions">
-								<button class="primary-btn" x-on:click="mass_editing = !mass_editing">
+								<button
+									class="primary-btn"
+									x-on:click="mass_editing = !mass_editing"
+								>
 									Massamuokkaus
 								</button>
 								<button
@@ -102,14 +136,20 @@
 								>
 									Näytä opiskelijat
 								</button>
-								<div x-data="{ confirm: false }" style="display: inline-flex; gap: 6px">
+								<div
+									x-data="{ confirm: false }"
+									style="display: inline-flex; gap: 6px"
+								>
 									<button
 										x-show="!confirm"
 										class="icon-btn"
 										title="Arkistoi ryhmä"
 										x-on:click="confirm = true;"
 									>
-										<img src="/static/archive.svg" alt="Arkistoi" />
+										<img
+											src="/static/archive.svg"
+											alt="Arkistoi"
+										/>
 									</button>
 									<button
 										x-show="!confirm"
@@ -120,9 +160,16 @@
 														else
 														$store.state.editingGroup = null"
 									>
-										<img src="/static/pen.svg" alt="Muokkaa" />
+										<img
+											src="/static/pen.svg"
+											alt="Muokkaa"
+										/>
 									</button>
-									<button x-show="confirm" class="primary-btn" x-on:click="confirm = false">
+									<button
+										x-show="confirm"
+										class="primary-btn"
+										x-on:click="confirm = false"
+									>
 										Peru
 									</button>
 									<button
@@ -152,7 +199,11 @@
 								</div>
 								<div class="editing-menu-form">
 									<label for="name">Nimi:</label><br />
-									<input name="name" x-model="edit.name" type="text" /><br />
+									<input
+										name="name"
+										x-model="edit.name"
+										type="text"
+									/><br />
 								</div>
 								<div class="editing-menu-actions">
 									<button
@@ -175,23 +226,39 @@
 							</div>
 						</template>
 						<!-- Mass editing -->
-						<div class="editing-menu" x-show="mass_editing" style="margin-top: 6px">
+						<div
+							class="editing-menu"
+							x-show="mass_editing"
+							style="margin-top: 6px"
+						>
 							<div class="editing-menu-title">
-								<span> Muokkaa kaikkia ryhmään kuuluvia opiskelijoita koskevia muuttujia </span>
+								<span>
+									Muokkaa kaikkia ryhmään kuuluvia opiskelijoita koskevia
+									muuttujia
+								</span>
 							</div>
 
 							<div x-data="{ mass_break: 0 }">
 								<div style="padding: 15px; border-bottom: 1px solid var(--border)">
-									<label for="excluded_days"> Taukoaika (päivää kohtaan) (minuutteina) </label><br />
+									<label for="excluded_days">
+										Taukoaika (päivää kohtaan) (minuutteina) </label
+									><br />
 									<small>
-										Taukoaikaan tehdy muutokset korvaavat kaikkien opiskelijoiden aiemmat taukoajat.
+										Taukoaikaan tehdy muutokset korvaavat kaikkien
+										opiskelijoiden aiemmat taukoajat.
 									</small>
 								</div>
 								<div style="padding: 15px; border-bottom: 1px solid var(--border)">
-									<input x-model.number="mass_break" type="number" /><br />
+									<input
+										x-model.number="mass_break"
+										type="number"
+									/><br />
 								</div>
 								<div style="padding: 15px; border-bottom: 1px solid var(--border)">
-									<button class="primary-btn" x-on:click="editBreakAll(group.id, mass_break*60)">
+									<button
+										class="primary-btn"
+										x-on:click="editBreakAll(group.id, mass_break*60)"
+									>
 										Muokkaa taukoaikaa
 									</button>
 								</div>
@@ -202,16 +269,22 @@
 								<div style="padding: 15px; border-bottom: 1px solid var(--border)">
 									<span>Ajanjakso</span><br />
 									<small>
-										Ajanjaksoon tehdy muutokset korvaavat kaikkien opiskelijoiden aiemmat
-										ajanjaksot.
+										Ajanjaksoon tehdy muutokset korvaavat kaikkien
+										opiskelijoiden aiemmat ajanjaksot.
 									</small>
 								</div>
 
 								<div style="padding: 15px; border-bottom: 1px solid var(--border)">
 									<label for="start_date">Aloitus päivä:</label><br />
-									<input x-model="mass_start" type="date" /><br />
+									<input
+										x-model="mass_start"
+										type="date"
+									/><br />
 									<label for="start_date">Lopetus päivä:</label><br />
-									<input x-model="mass_end" type="date" /><br />
+									<input
+										x-model="mass_end"
+										type="date"
+									/><br />
 								</div>
 								<div style="padding: 15px">
 									<button
@@ -227,7 +300,8 @@
 							<div style="padding: 15px; border-top: 1px solid var(--border)">
 								<span>Aikataulu</span><br />
 								<small>
-									Aikatauluun tehdyt muutokset korvaavat kaikkien opiskelijoiden aiemmat aikataulut.
+									Aikatauluun tehdyt muutokset korvaavat kaikkien opiskelijoiden
+									aiemmat aikataulut.
 								</small>
 							</div>
 
@@ -241,16 +315,28 @@
 									>
 										<span style="text-align: center">Ma</span>
 										<template x-if="mass_schedule[0]==null">
-											<input type="time" :disabled="mass_schedule[0]==null" />
+											<input
+												type="time"
+												:disabled="mass_schedule[0]==null"
+											/>
 										</template>
 										<template x-if="mass_schedule[0]==null">
-											<input type="time" :disabled="mass_schedule[0]==null" />
+											<input
+												type="time"
+												:disabled="mass_schedule[0]==null"
+											/>
 										</template>
 										<template x-if="mass_schedule[0]!=null">
-											<input type="time" x-model="mass_schedule[0].start" />
+											<input
+												type="time"
+												x-model="mass_schedule[0].start"
+											/>
 										</template>
 										<template x-if="mass_schedule[0]!=null">
-											<input type="time" x-model="mass_schedule[0].end" />
+											<input
+												type="time"
+												x-model="mass_schedule[0].end"
+											/>
 										</template>
 										<input
 											type="checkbox"
@@ -268,16 +354,28 @@
 									>
 										<span style="text-align: center">Ti</span>
 										<template x-if="mass_schedule[1]==null">
-											<input type="time" :disabled="mass_schedule[1]==null" />
+											<input
+												type="time"
+												:disabled="mass_schedule[1]==null"
+											/>
 										</template>
 										<template x-if="mass_schedule[1]==null">
-											<input type="time" :disabled="mass_schedule[1]==null" />
+											<input
+												type="time"
+												:disabled="mass_schedule[1]==null"
+											/>
 										</template>
 										<template x-if="mass_schedule[1]!=null">
-											<input type="time" x-model="mass_schedule[1].start" />
+											<input
+												type="time"
+												x-model="mass_schedule[1].start"
+											/>
 										</template>
 										<template x-if="mass_schedule[1]!=null">
-											<input type="time" x-model="mass_schedule[1].end" />
+											<input
+												type="time"
+												x-model="mass_schedule[1].end"
+											/>
 										</template>
 										<input
 											type="checkbox"
@@ -295,16 +393,28 @@
 									>
 										<span style="text-align: center">Ke</span>
 										<template x-if="mass_schedule[2]==null">
-											<input type="time" :disabled="mass_schedule[2]==null" />
+											<input
+												type="time"
+												:disabled="mass_schedule[2]==null"
+											/>
 										</template>
 										<template x-if="mass_schedule[2]==null">
-											<input type="time" :disabled="mass_schedule[2]==null" />
+											<input
+												type="time"
+												:disabled="mass_schedule[2]==null"
+											/>
 										</template>
 										<template x-if="mass_schedule[2]!=null">
-											<input type="time" x-model="mass_schedule[2].start" />
+											<input
+												type="time"
+												x-model="mass_schedule[2].start"
+											/>
 										</template>
 										<template x-if="mass_schedule[2]!=null">
-											<input type="time" x-model="mass_schedule[2].end" />
+											<input
+												type="time"
+												x-model="mass_schedule[2].end"
+											/>
 										</template>
 										<input
 											type="checkbox"
@@ -322,16 +432,28 @@
 									>
 										<span style="text-align: center">To</span>
 										<template x-if="mass_schedule[3]==null">
-											<input type="time" :disabled="mass_schedule[3]==null" />
+											<input
+												type="time"
+												:disabled="mass_schedule[3]==null"
+											/>
 										</template>
 										<template x-if="mass_schedule[3]==null">
-											<input type="time" :disabled="mass_schedule[3]==null" />
+											<input
+												type="time"
+												:disabled="mass_schedule[3]==null"
+											/>
 										</template>
 										<template x-if="mass_schedule[3]!=null">
-											<input type="time" x-model="mass_schedule[3].start" />
+											<input
+												type="time"
+												x-model="mass_schedule[3].start"
+											/>
 										</template>
 										<template x-if="mass_schedule[3]!=null">
-											<input type="time" x-model="mass_schedule[3].end" />
+											<input
+												type="time"
+												x-model="mass_schedule[3].end"
+											/>
 										</template>
 										<input
 											type="checkbox"
@@ -349,16 +471,28 @@
 									>
 										<span style="text-align: center">Pe</span>
 										<template x-if="mass_schedule[4]==null">
-											<input type="time" :disabled="mass_schedule[4]==null" />
+											<input
+												type="time"
+												:disabled="mass_schedule[4]==null"
+											/>
 										</template>
 										<template x-if="mass_schedule[4]==null">
-											<input type="time" :disabled="mass_schedule[4]==null" />
+											<input
+												type="time"
+												:disabled="mass_schedule[4]==null"
+											/>
 										</template>
 										<template x-if="mass_schedule[4]!=null">
-											<input type="time" x-model="mass_schedule[4].start" />
+											<input
+												type="time"
+												x-model="mass_schedule[4].start"
+											/>
 										</template>
 										<template x-if="mass_schedule[4]!=null">
-											<input type="time" x-model="mass_schedule[4].end" />
+											<input
+												type="time"
+												x-model="mass_schedule[4].end"
+											/>
 										</template>
 										<input
 											type="checkbox"
@@ -376,16 +510,28 @@
 									>
 										<span style="text-align: center">La</span>
 										<template x-if="mass_schedule[5]==null">
-											<input type="time" :disabled="mass_schedule[5]==null" />
+											<input
+												type="time"
+												:disabled="mass_schedule[5]==null"
+											/>
 										</template>
 										<template x-if="mass_schedule[5]==null">
-											<input type="time" :disabled="mass_schedule[5]==null" />
+											<input
+												type="time"
+												:disabled="mass_schedule[5]==null"
+											/>
 										</template>
 										<template x-if="mass_schedule[5]!=null">
-											<input type="time" x-model="mass_schedule[5].start" />
+											<input
+												type="time"
+												x-model="mass_schedule[5].start"
+											/>
 										</template>
 										<template x-if="mass_schedule[5]!=null">
-											<input type="time" x-model="mass_schedule[5].end" />
+											<input
+												type="time"
+												x-model="mass_schedule[5].end"
+											/>
 										</template>
 										<input
 											type="checkbox"
@@ -403,16 +549,28 @@
 									>
 										<span style="text-align: center">Su</span>
 										<template x-if="mass_schedule[6]==null">
-											<input type="time" :disabled="mass_schedule[6]==null" />
+											<input
+												type="time"
+												:disabled="mass_schedule[6]==null"
+											/>
 										</template>
 										<template x-if="mass_schedule[6]==null">
-											<input type="time" :disabled="mass_schedule[6]==null" />
+											<input
+												type="time"
+												:disabled="mass_schedule[6]==null"
+											/>
 										</template>
 										<template x-if="mass_schedule[6]!=null">
-											<input type="time" x-model="mass_schedule[6].start" />
+											<input
+												type="time"
+												x-model="mass_schedule[6].start"
+											/>
 										</template>
 										<template x-if="mass_schedule[6]!=null">
-											<input type="time" x-model="mass_schedule[6].end" />
+											<input
+												type="time"
+												x-model="mass_schedule[6].end"
+											/>
 										</template>
 										<input
 											type="checkbox"
@@ -425,7 +583,10 @@
 									</div>
 								</div>
 								<div style="padding: 15px; border-bottom: 1px solid var(--border)">
-									<button class="primary-btn" x-on:click="editScheduleAll(group.id, mass_schedule)">
+									<button
+										class="primary-btn"
+										x-on:click="editScheduleAll(group.id, mass_schedule)"
+									>
 										Muokkaa aikataulua
 									</button>
 								</div>
@@ -436,9 +597,10 @@
 							<div style="padding: 15px; border-bottom: 1px solid var(--border)">
 								<label for="excluded_days">Vapaapäivät (sinisellä):</label><br />
 								<small>
-									Tämä lisää kaikille opiskelijoille nämä päivät vapaaksi. Jos jollakin opiskelijalla
-									on jo tämä päivä vapaana, se ei muutu. Tämä ei myöskään poista vapaa päiviä joita on
-									jo muuten aseteltu oppilaille.
+									Tämä lisää kaikille opiskelijoille nämä päivät vapaaksi. Jos
+									jollakin opiskelijalla on jo tämä päivä vapaana, se ei muutu.
+									Tämä ei myöskään poista vapaa päiviä joita on jo muuten aseteltu
+									oppilaille.
 								</small>
 							</div>
 							<div style="padding: 15px; border-bottom: 1px solid var(--border)">
@@ -455,11 +617,20 @@
 							</div>
 
 							<div class="editing-menu-actions">
-								<button class="primary-btn" x-on:click="mass_editing = false">Peruuta</button>
+								<button
+									class="primary-btn"
+									x-on:click="mass_editing = false"
+								>
+									Peruuta
+								</button>
 							</div>
 						</div>
 						<!-- Adding student -->
-						<div class="editing-menu" x-show="adding" style="margin-top: 6px">
+						<div
+							class="editing-menu"
+							x-show="adding"
+							style="margin-top: 6px"
+						>
 							<div class="editing-menu-title">
 								<span>Lisää uusi opiskelija</span>
 							</div>
@@ -486,19 +657,27 @@
 								>
 									Kuuntele skannauksia
 								</button>
-								<small x-show="$store.state.addingStudent != null"> Kuunnellaan skannauksia... </small>
+								<small x-show="$store.state.addingStudent != null">
+									Kuunnellaan skannauksia...
+								</small>
 								<br />
 								<label for="start_date"> Aloitus päivä:</label><br />
-								<input x-model="add_student.start_date" type="date" /><br />
+								<input
+									x-model="add_student.start_date"
+									type="date"
+								/><br />
 								<label for="start_date"> Lopetus päivä:</label><br />
-								<input x-model="add_student.end_date" type="date" /><br />
+								<input
+									x-model="add_student.end_date"
+									type="date"
+								/><br />
 							</div>
 
 							<div style="padding: 15px">
 								<span>Aikataulu</span><br />
 								<small>
-									Aikataulu määrittää työajat viikonpäivä kohtaisesti. Sillä voi myös merkitä mitkä
-									päivät ovat aktiivisia ja mitkä ei.
+									Aikataulu määrittää työajat viikonpäivä kohtaisesti. Sillä voi
+									myös merkitä mitkä päivät ovat aktiivisia ja mitkä ei.
 								</small>
 							</div>
 
@@ -510,16 +689,28 @@
 								>
 									<span style="text-align: center">Ma</span>
 									<template x-if="add_student.schedule[0]==null">
-										<input type="time" :disabled="add_student.schedule[0]==null" />
+										<input
+											type="time"
+											:disabled="add_student.schedule[0]==null"
+										/>
 									</template>
 									<template x-if="add_student.schedule[0]==null">
-										<input type="time" :disabled="add_student.schedule[0]==null" />
+										<input
+											type="time"
+											:disabled="add_student.schedule[0]==null"
+										/>
 									</template>
 									<template x-if="add_student.schedule[0]!=null">
-										<input type="time" x-model="add_student.schedule[0].start" />
+										<input
+											type="time"
+											x-model="add_student.schedule[0].start"
+										/>
 									</template>
 									<template x-if="add_student.schedule[0]!=null">
-										<input type="time" x-model="add_student.schedule[0].end" />
+										<input
+											type="time"
+											x-model="add_student.schedule[0].end"
+										/>
 									</template>
 									<input
 										type="checkbox"
@@ -537,16 +728,28 @@
 								>
 									<span style="text-align: center">Ti</span>
 									<template x-if="add_student.schedule[1]==null">
-										<input type="time" :disabled="add_student.schedule[1]==null" />
+										<input
+											type="time"
+											:disabled="add_student.schedule[1]==null"
+										/>
 									</template>
 									<template x-if="add_student.schedule[1]==null">
-										<input type="time" :disabled="add_student.schedule[1]==null" />
+										<input
+											type="time"
+											:disabled="add_student.schedule[1]==null"
+										/>
 									</template>
 									<template x-if="add_student.schedule[1]!=null">
-										<input type="time" x-model="add_student.schedule[1].start" />
+										<input
+											type="time"
+											x-model="add_student.schedule[1].start"
+										/>
 									</template>
 									<template x-if="add_student.schedule[1]!=null">
-										<input type="time" x-model="add_student.schedule[1].end" />
+										<input
+											type="time"
+											x-model="add_student.schedule[1].end"
+										/>
 									</template>
 									<input
 										type="checkbox"
@@ -564,16 +767,28 @@
 								>
 									<span style="text-align: center">Ke</span>
 									<template x-if="add_student.schedule[2]==null">
-										<input type="time" :disabled="add_student.schedule[2]==null" />
+										<input
+											type="time"
+											:disabled="add_student.schedule[2]==null"
+										/>
 									</template>
 									<template x-if="add_student.schedule[2]==null">
-										<input type="time" :disabled="add_student.schedule[2]==null" />
+										<input
+											type="time"
+											:disabled="add_student.schedule[2]==null"
+										/>
 									</template>
 									<template x-if="add_student.schedule[2]!=null">
-										<input type="time" x-model="add_student.schedule[2].start" />
+										<input
+											type="time"
+											x-model="add_student.schedule[2].start"
+										/>
 									</template>
 									<template x-if="add_student.schedule[2]!=null">
-										<input type="time" x-model="add_student.schedule[2].end" />
+										<input
+											type="time"
+											x-model="add_student.schedule[2].end"
+										/>
 									</template>
 									<input
 										type="checkbox"
@@ -591,16 +806,28 @@
 								>
 									<span style="text-align: center">To</span>
 									<template x-if="add_student.schedule[3]==null">
-										<input type="time" :disabled="add_student.schedule[3]==null" />
+										<input
+											type="time"
+											:disabled="add_student.schedule[3]==null"
+										/>
 									</template>
 									<template x-if="add_student.schedule[3]==null">
-										<input type="time" :disabled="add_student.schedule[3]==null" />
+										<input
+											type="time"
+											:disabled="add_student.schedule[3]==null"
+										/>
 									</template>
 									<template x-if="add_student.schedule[3]!=null">
-										<input type="time" x-model="add_student.schedule[3].start" />
+										<input
+											type="time"
+											x-model="add_student.schedule[3].start"
+										/>
 									</template>
 									<template x-if="add_student.schedule[3]!=null">
-										<input type="time" x-model="add_student.schedule[3].end" />
+										<input
+											type="time"
+											x-model="add_student.schedule[3].end"
+										/>
 									</template>
 									<input
 										type="checkbox"
@@ -618,16 +845,28 @@
 								>
 									<span style="text-align: center">Pe</span>
 									<template x-if="add_student.schedule[4]==null">
-										<input type="time" :disabled="add_student.schedule[4]==null" />
+										<input
+											type="time"
+											:disabled="add_student.schedule[4]==null"
+										/>
 									</template>
 									<template x-if="add_student.schedule[4]==null">
-										<input type="time" :disabled="add_student.schedule[4]==null" />
+										<input
+											type="time"
+											:disabled="add_student.schedule[4]==null"
+										/>
 									</template>
 									<template x-if="add_student.schedule[4]!=null">
-										<input type="time" x-model="add_student.schedule[4].start" />
+										<input
+											type="time"
+											x-model="add_student.schedule[4].start"
+										/>
 									</template>
 									<template x-if="add_student.schedule[4]!=null">
-										<input type="time" x-model="add_student.schedule[4].end" />
+										<input
+											type="time"
+											x-model="add_student.schedule[4].end"
+										/>
 									</template>
 									<input
 										type="checkbox"
@@ -645,16 +884,28 @@
 								>
 									<span style="text-align: center">La</span>
 									<template x-if="add_student.schedule[5]==null">
-										<input type="time" :disabled="add_student.schedule[5]==null" />
+										<input
+											type="time"
+											:disabled="add_student.schedule[5]==null"
+										/>
 									</template>
 									<template x-if="add_student.schedule[5]==null">
-										<input type="time" :disabled="add_student.schedule[5]==null" />
+										<input
+											type="time"
+											:disabled="add_student.schedule[5]==null"
+										/>
 									</template>
 									<template x-if="add_student.schedule[5]!=null">
-										<input type="time" x-model="add_student.schedule[5].start" />
+										<input
+											type="time"
+											x-model="add_student.schedule[5].start"
+										/>
 									</template>
 									<template x-if="add_student.schedule[5]!=null">
-										<input type="time" x-model="add_student.schedule[5].end" />
+										<input
+											type="time"
+											x-model="add_student.schedule[5].end"
+										/>
 									</template>
 									<input
 										type="checkbox"
@@ -672,16 +923,28 @@
 								>
 									<span style="text-align: center">Su</span>
 									<template x-if="add_student.schedule[6]==null">
-										<input type="time" :disabled="add_student.schedule[6]==null" />
+										<input
+											type="time"
+											:disabled="add_student.schedule[6]==null"
+										/>
 									</template>
 									<template x-if="add_student.schedule[6]==null">
-										<input type="time" :disabled="add_student.schedule[6]==null" />
+										<input
+											type="time"
+											:disabled="add_student.schedule[6]==null"
+										/>
 									</template>
 									<template x-if="add_student.schedule[6]!=null">
-										<input type="time" x-model="add_student.schedule[6].start" />
+										<input
+											type="time"
+											x-model="add_student.schedule[6].start"
+										/>
 									</template>
 									<template x-if="add_student.schedule[6]!=null">
-										<input type="time" x-model="add_student.schedule[6].end" />
+										<input
+											type="time"
+											x-model="add_student.schedule[6].end"
+										/>
 									</template>
 									<input
 										type="checkbox"
@@ -697,8 +960,8 @@
 							<div style="padding: 15px; border-bottom: 1px solid var(--border)">
 								<span>Vapaapäivät (sinisellä)</span><br />
 								<small>
-									Vapaapäiville ei lasketa työtunteja. Vapaapäiviin kuulu myös päivät, jotka eivät ole
-									aktiivisia aikataulussa.
+									Vapaapäiville ei lasketa työtunteja. Vapaapäiviin kuulu myös
+									päivät, jotka eivät ole aktiivisia aikataulussa.
 								</small>
 							</div>
 
@@ -735,12 +998,26 @@
 							</div>
 						</div>
 						<!-- Students -->
-						<div x-show="show && students.length == 0" class="item" style="margin-top: 6px">
+						<div
+							x-show="show && students.length == 0"
+							class="item"
+							style="margin-top: 6px"
+						>
 							<span>Ei opiskelijoita</span>
 						</div>
-						<div x-show="show && students.length > 0" class="list" style="margin-top: 6px">
-							<template x-for="student in students" :key="student.id">
-								<div class="multi-item-container" x-data="{ scans: null }">
+						<div
+							x-show="show && students.length > 0"
+							class="list"
+							style="margin-top: 6px"
+						>
+							<template
+								x-for="student in students"
+								:key="student.id"
+							>
+								<div
+									class="multi-item-container"
+									x-data="{ scans: null }"
+								>
 									<!-- Student info -->
 									<div
 										class="item"
@@ -749,12 +1026,18 @@
 									>
 										<div>
 											<span x-text="student.name"></span> -
-											<span x-text="formatForReading(student.remaining)"></span> -
+											<span
+												x-text="formatForReading(student.remaining)"
+											></span>
+											-
 											<span
 												x-text="student.status == 'IN' ? 'Tila: Sisällä' : 'Tila: Ulkona'"
 											></span
 											><br />
-											<span class="small" x-text="'Kortin UID: '+student.uid"></span>
+											<span
+												class="small"
+												x-text="'Kortin UID: '+student.uid"
+											></span>
 										</div>
 										<div class="item-actions">
 											<button
@@ -780,7 +1063,10 @@
 												 }
                                                  "
 											>
-												<img src="/static/pen.svg" alt="Muokkaa" />
+												<img
+													src="/static/pen.svg"
+													alt="Muokkaa"
+												/>
 											</button>
 											<div x-data="{ confirm: false }">
 												<div x-show="!confirm">
@@ -789,7 +1075,10 @@
 														title="Arkistoi oppilas"
 														x-on:click="confirm = true"
 													>
-														<img src="/static/archive.svg" alt="Arkistoi" />
+														<img
+															src="/static/archive.svg"
+															alt="Arkistoi"
+														/>
 													</button>
 												</div>
 												<button
@@ -817,25 +1106,42 @@
                                               $store.state.editingStudent.id ==
                                               student.id"
 									>
-										<div class="editing-menu" x-data="{ edit: $store.state.editingStudent }">
+										<div
+											class="editing-menu"
+											x-data="{ edit: $store.state.editingStudent }"
+										>
 											<div class="editing-menu-title">
 												<span>Muokataan oppilasta:</span>
 												<span x-text="edit.name"></span>
 											</div>
 											<div>
-												<div style="padding: 15px; border-bottom: 1px solid var(--border)">
+												<div
+													style="
+														padding: 15px;
+														border-bottom: 1px solid var(--border);
+													"
+												>
 													<span>Perustiedot</span><br />
 													<small> Opiskelijan perustiedot. </small>
 												</div>
-												<div style="padding: 15px; border-bottom: 1px solid var(--border)">
+												<div
+													style="
+														padding: 15px;
+														border-bottom: 1px solid var(--border);
+													"
+												>
 													<label for="name">Nimi:</label><br />
 													<input x-model="edit.name" /><br />
 													<label for="status">Tila:</label><br />
-													<select id="status" x-model="edit.status">
+													<select
+														id="status"
+														x-model="edit.status"
+													>
 														<option value="IN">IN</option>
 														<option value="OUT">OUT</option></select
 													><br />
-													<label for="done_seconds"> Tehty työ: </label><br />
+													<label for="done_seconds"> Tehty työ: </label
+													><br />
 
 													<button
 														class="primary-btn"
@@ -851,7 +1157,9 @@
 													>
 														-10 min
 													</button>
-													<span x-text="secondsToHuman(edit.done_seconds)"></span>
+													<span
+														x-text="secondsToHuman(edit.done_seconds)"
+													></span>
 													<button
 														class="primary-btn"
 														x-on:click="edit.done_seconds += 60*10"
@@ -867,20 +1175,33 @@
 														+1 h</button
 													><br />
 
-													<label for="break_time"> Tauko (per päivä) (minuutteina) </label
+													<label for="break_time">
+														Tauko (per päivä) (minuutteina) </label
 													><br />
-													<input x-model.number="edit.break_time" type="number" /><br />
-													<label for="start_date"> Aloitus päivä:</label><br />
-													<input x-model="edit.start_date" type="date" /><br />
-													<label for="start_date"> Lopetus päivä:</label><br />
-													<input x-model="edit.end_date" type="date" />
+													<input
+														x-model.number="edit.break_time"
+														type="number"
+													/><br />
+													<label for="start_date"> Aloitus päivä:</label
+													><br />
+													<input
+														x-model="edit.start_date"
+														type="date"
+													/><br />
+													<label for="start_date"> Lopetus päivä:</label
+													><br />
+													<input
+														x-model="edit.end_date"
+														type="date"
+													/>
 												</div>
 
 												<div style="padding: 15px">
 													<span>Aikataulu</span><br />
 													<small>
-														Aikataulu määrittää työajat viikonpäivä kohtaisesti. Sillä voi
-														myös merkitä mitkä päivät ovat aktiivisia ja mitkä ei.
+														Aikataulu määrittää työajat viikonpäivä
+														kohtaisesti. Sillä voi myös merkitä mitkä
+														päivät ovat aktiivisia ja mitkä ei.
 													</small>
 												</div>
 
@@ -892,16 +1213,28 @@
 													>
 														<span style="text-align: center">Ma</span>
 														<template x-if="edit.schedule[0]==null">
-															<input type="time" :disabled="edit.schedule[0]==null" />
+															<input
+																type="time"
+																:disabled="edit.schedule[0]==null"
+															/>
 														</template>
 														<template x-if="edit.schedule[0]==null">
-															<input type="time" :disabled="edit.schedule[0]==null" />
+															<input
+																type="time"
+																:disabled="edit.schedule[0]==null"
+															/>
 														</template>
 														<template x-if="edit.schedule[0]!=null">
-															<input type="time" x-model="edit.schedule[0].start" />
+															<input
+																type="time"
+																x-model="edit.schedule[0].start"
+															/>
 														</template>
 														<template x-if="edit.schedule[0]!=null">
-															<input type="time" x-model="edit.schedule[0].end" />
+															<input
+																type="time"
+																x-model="edit.schedule[0].end"
+															/>
 														</template>
 														<input
 															type="checkbox"
@@ -919,16 +1252,28 @@
 													>
 														<span style="text-align: center">Ti</span>
 														<template x-if="edit.schedule[1]==null">
-															<input type="time" :disabled="edit.schedule[1]==null" />
+															<input
+																type="time"
+																:disabled="edit.schedule[1]==null"
+															/>
 														</template>
 														<template x-if="edit.schedule[1]==null">
-															<input type="time" :disabled="edit.schedule[1]==null" />
+															<input
+																type="time"
+																:disabled="edit.schedule[1]==null"
+															/>
 														</template>
 														<template x-if="edit.schedule[1]!=null">
-															<input type="time" x-model="edit.schedule[1].start" />
+															<input
+																type="time"
+																x-model="edit.schedule[1].start"
+															/>
 														</template>
 														<template x-if="edit.schedule[1]!=null">
-															<input type="time" x-model="edit.schedule[1].end" />
+															<input
+																type="time"
+																x-model="edit.schedule[1].end"
+															/>
 														</template>
 														<input
 															type="checkbox"
@@ -946,16 +1291,28 @@
 													>
 														<span style="text-align: center">Ke</span>
 														<template x-if="edit.schedule[2]==null">
-															<input type="time" :disabled="edit.schedule[2]==null" />
+															<input
+																type="time"
+																:disabled="edit.schedule[2]==null"
+															/>
 														</template>
 														<template x-if="edit.schedule[2]==null">
-															<input type="time" :disabled="edit.schedule[2]==null" />
+															<input
+																type="time"
+																:disabled="edit.schedule[2]==null"
+															/>
 														</template>
 														<template x-if="edit.schedule[2]!=null">
-															<input type="time" x-model="edit.schedule[2].start" />
+															<input
+																type="time"
+																x-model="edit.schedule[2].start"
+															/>
 														</template>
 														<template x-if="edit.schedule[2]!=null">
-															<input type="time" x-model="edit.schedule[2].end" />
+															<input
+																type="time"
+																x-model="edit.schedule[2].end"
+															/>
 														</template>
 														<input
 															type="checkbox"
@@ -973,16 +1330,28 @@
 													>
 														<span style="text-align: center">To</span>
 														<template x-if="edit.schedule[3]==null">
-															<input type="time" :disabled="edit.schedule[3]==null" />
+															<input
+																type="time"
+																:disabled="edit.schedule[3]==null"
+															/>
 														</template>
 														<template x-if="edit.schedule[3]==null">
-															<input type="time" :disabled="edit.schedule[3]==null" />
+															<input
+																type="time"
+																:disabled="edit.schedule[3]==null"
+															/>
 														</template>
 														<template x-if="edit.schedule[3]!=null">
-															<input type="time" x-model="edit.schedule[3].start" />
+															<input
+																type="time"
+																x-model="edit.schedule[3].start"
+															/>
 														</template>
 														<template x-if="edit.schedule[3]!=null">
-															<input type="time" x-model="edit.schedule[3].end" />
+															<input
+																type="time"
+																x-model="edit.schedule[3].end"
+															/>
 														</template>
 														<input
 															type="checkbox"
@@ -1000,16 +1369,28 @@
 													>
 														<span style="text-align: center">Pe</span>
 														<template x-if="edit.schedule[4]==null">
-															<input type="time" :disabled="edit.schedule[4]==null" />
+															<input
+																type="time"
+																:disabled="edit.schedule[4]==null"
+															/>
 														</template>
 														<template x-if="edit.schedule[4]==null">
-															<input type="time" :disabled="edit.schedule[4]==null" />
+															<input
+																type="time"
+																:disabled="edit.schedule[4]==null"
+															/>
 														</template>
 														<template x-if="edit.schedule[4]!=null">
-															<input type="time" x-model="edit.schedule[4].start" />
+															<input
+																type="time"
+																x-model="edit.schedule[4].start"
+															/>
 														</template>
 														<template x-if="edit.schedule[4]!=null">
-															<input type="time" x-model="edit.schedule[4].end" />
+															<input
+																type="time"
+																x-model="edit.schedule[4].end"
+															/>
 														</template>
 														<input
 															type="checkbox"
@@ -1027,16 +1408,28 @@
 													>
 														<span style="text-align: center">La</span>
 														<template x-if="edit.schedule[5]==null">
-															<input type="time" :disabled="edit.schedule[5]==null" />
+															<input
+																type="time"
+																:disabled="edit.schedule[5]==null"
+															/>
 														</template>
 														<template x-if="edit.schedule[5]==null">
-															<input type="time" :disabled="edit.schedule[5]==null" />
+															<input
+																type="time"
+																:disabled="edit.schedule[5]==null"
+															/>
 														</template>
 														<template x-if="edit.schedule[5]!=null">
-															<input type="time" x-model="edit.schedule[5].start" />
+															<input
+																type="time"
+																x-model="edit.schedule[5].start"
+															/>
 														</template>
 														<template x-if="edit.schedule[5]!=null">
-															<input type="time" x-model="edit.schedule[5].end" />
+															<input
+																type="time"
+																x-model="edit.schedule[5].end"
+															/>
 														</template>
 														<input
 															type="checkbox"
@@ -1054,16 +1447,28 @@
 													>
 														<span style="text-align: center">Su</span>
 														<template x-if="edit.schedule[6]==null">
-															<input type="time" :disabled="edit.schedule[6]==null" />
+															<input
+																type="time"
+																:disabled="edit.schedule[6]==null"
+															/>
 														</template>
 														<template x-if="edit.schedule[6]==null">
-															<input type="time" :disabled="edit.schedule[6]==null" />
+															<input
+																type="time"
+																:disabled="edit.schedule[6]==null"
+															/>
 														</template>
 														<template x-if="edit.schedule[6]!=null">
-															<input type="time" x-model="edit.schedule[6].start" />
+															<input
+																type="time"
+																x-model="edit.schedule[6].start"
+															/>
 														</template>
 														<template x-if="edit.schedule[6]!=null">
-															<input type="time" x-model="edit.schedule[6].end" />
+															<input
+																type="time"
+																x-model="edit.schedule[6].end"
+															/>
 														</template>
 														<input
 															type="checkbox"
@@ -1076,11 +1481,17 @@
 													</div>
 												</div>
 
-												<div style="padding: 15px; border-bottom: 1px solid var(--border)">
+												<div
+													style="
+														padding: 15px;
+														border-bottom: 1px solid var(--border);
+													"
+												>
 													<span>Vapaapäivät (sinisellä)</span><br />
 													<small>
-														Vapaapäiville ei lasketa työtunteja. Vapaapäiviin kuulu myös
-														päivät, jotka eivät ole aktiivisia aikataulussa.
+														Vapaapäiville ei lasketa työtunteja.
+														Vapaapäiviin kuulu myös päivät, jotka eivät
+														ole aktiivisia aikataulussa.
 													</small>
 												</div>
 
@@ -1146,18 +1557,31 @@
 										>
 											<div class="inline-list-filter">
 												<label for="start_date"> Aloitus päivä:</label>
-												<input x-model="filter_start" type="date" />
+												<input
+													x-model="filter_start"
+													type="date"
+												/>
 												<label for="start_date"> Lopetus päivä:</label>
-												<input x-model="filter_end" type="date" />
+												<input
+													x-model="filter_end"
+													type="date"
+												/>
 											</div>
 											<template x-for="scan in filtered_scans">
 												<div class="inline-item">
 													<span x-text="scan.timestamp"> </span> -
-													<span x-show="scan.new_status=='IN'"> Skannattiin sisään </span>
-													<span x-show="scan.new_status=='OUT'"> Skannattiin ulos </span>
+													<span x-show="scan.new_status=='IN'">
+														Skannattiin sisään
+													</span>
+													<span x-show="scan.new_status=='OUT'">
+														Skannattiin ulos
+													</span>
 												</div>
 											</template>
-											<div style="padding: 15px" x-show="filtered_scans.length == 0">
+											<div
+												style="padding: 15px"
+												x-show="filtered_scans.length == 0"
+											>
 												Ei skannauksia
 											</div>
 										</div>
@@ -1193,11 +1617,17 @@
 				</div>
 
 				<small x-show="$store.state.deviceScan.devices.length > 0">Löydetyt laitteet</small>
-				<template x-for="device in $store.state.deviceScan.devices" :key="device.entry.text[0].split('=')[1]">
+				<template
+					x-for="device in $store.state.deviceScan.devices"
+					:key="device.entry.text[0].split('=')[1]"
+				>
 					<div class="item">
 						<div>
 							<span x-text="device.entry.name"></span><br />
-							<span class="small" x-text="device.entry.text[0].split('=')[1]"></span>
+							<span
+								class="small"
+								x-text="device.entry.text[0].split('=')[1]"
+							></span>
 						</div>
 						<button
 							class="primary-btn"
@@ -1215,25 +1645,54 @@
 				>
 					Jo yhdistetyt laitteet
 				</small>
-				<template x-for="device in $store.state.pairedDevices" :key="device.id">
-					<div class="multi-item-container" x-data="{ editing: false}">
-						<div class="item" :class="device.online ? 'active' : ''">
+				<template
+					x-for="device in $store.state.pairedDevices"
+					:key="device.id"
+				>
+					<div
+						class="multi-item-container"
+						x-data="{ editing: false}"
+					>
+						<div
+							class="item"
+							:class="device.online ? 'active' : ''"
+						>
 							<div>
 								<span x-text="device.name"></span> -
 								<span>Tila: </span>
-								<span x-text="device.online ? 'Linjoilla' : 'Ei yhteyttä'"></span><br />
-								<span class="small" x-text="device.mac_addr"></span>
+								<span x-text="device.online ? 'Linjoilla' : 'Ei yhteyttä'"></span
+								><br />
+								<span
+									class="small"
+									x-text="device.mac_addr"
+								></span>
 							</div>
 							<div class="item-actions">
-								<button class="icon-btn" x-on:click="editing = !editing">
-									<img src="/static/pen.svg" alt="Edit" />
+								<button
+									class="icon-btn"
+									x-on:click="editing = !editing"
+								>
+									<img
+										src="/static/pen.svg"
+										alt="Edit"
+									/>
 								</button>
-								<button class="icon-btn" x-on:click="deleteDevice(device.id)">
-									<img src="/static/can.svg" alt="Unpair" />
+								<button
+									class="icon-btn"
+									x-on:click="deleteDevice(device.id)"
+								>
+									<img
+										src="/static/can.svg"
+										alt="Unpair"
+									/>
 								</button>
 							</div>
 						</div>
-						<div class="editing-menu" x-show="editing" x-data="{ edit_name: device.name }">
+						<div
+							class="editing-menu"
+							x-show="editing"
+							x-data="{ edit_name: device.name }"
+						>
 							<div class="editing-menu-title">
 								<span>Muokataan laitetta:</span>
 								<span x-text="device.name"></span>
@@ -1328,7 +1787,8 @@
 				excluded_days: [],
 			};
 
-			window.filterStudents = (group_id) => state.students.filter((x) => x.group_id == group_id);
+			window.filterStudents = (group_id) =>
+				state.students.filter((x) => x.group_id == group_id);
 
 			async function getStudents() {
 				try {
@@ -1598,7 +2058,9 @@
 					toast(`Pari lukijan ${result.name} kanssa muodostettu onnistuneesti`);
 					state.pairedDevices.push(result);
 					state.deviceScan.devices.splice(
-						state.deviceScan.devices.findIndex((item) => item.entry.name === result.name),
+						state.deviceScan.devices.findIndex(
+							(item) => item.entry.name === result.name,
+						),
 						1,
 					);
 					return result;
@@ -1789,7 +2251,9 @@
 							return;
 						}
 
-						const student = state.students.find((student) => student.id === scan.student_id);
+						const student = state.students.find(
+							(student) => student.id === scan.student_id,
+						);
 						if (student) toast(`Uusi skannaus: ${student.name}`);
 						else console.error("Scan student_id not found in students");
 						break;
@@ -1799,7 +2263,11 @@
 					case "student:update":
 						const updatedStudent = message.payload;
 						const ref =
-							state.students[state.students.findIndex((student) => student.id === updatedStudent.id)];
+							state.students[
+								state.students.findIndex(
+									(student) => student.id === updatedStudent.id,
+								)
+							];
 						modify(ref, updatedStudent);
 
 						// Update state in edit menu
@@ -1812,7 +2280,9 @@
 					case "student:archive":
 						const archivedStudent = message.payload;
 						state.students.splice(
-							state.students.findIndex((student) => student.id === archivedStudent.id),
+							state.students.findIndex(
+								(student) => student.id === archivedStudent.id,
+							),
 							1,
 						);
 						break;

@@ -102,10 +102,9 @@ type Student struct {
 }
 
 type Group struct {
-	ID         int    `json:"id"`
-	Name       string `json:"name"`
-	IsArchived bool   `json:"is_archived"`
-	CreatedAt  string `json:"created_at"`
+	ID        int    `json:"id"`
+	Name      string `json:"name"`
+	CreatedAt string `json:"created_at"`
 }
 
 type Teacher struct {

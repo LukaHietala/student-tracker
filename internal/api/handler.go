@@ -54,11 +54,10 @@ func NewHandler(s *db.Store, a *auth.Auth, h *websockets.Hub) *chi.Mux {
 	r.Route("/api", func(r chi.Router) {
 		r.Mount("/students", NewStudentResource(s, a, h).Routes())
 		r.Mount("/devices", NewDeviceResource(s, a).Routes())
-		r.Mount("/scans", NewScanResource(s, a).Routes())
+		r.Mount("/scans", NewScanResource(s, a, h).Routes())
 		r.Mount("/groups", NewGroupResource(s, a).Routes())
 		r.Mount("/teachers", NewTeacherResource(s, a).Routes())
 		r.Mount("/auth", NewAuthResource(s, a).Routes())
-		r.Mount("/session", NewSessionResource(s, a).Routes())
 	})
 
 	return r

@@ -25,19 +25,16 @@ func NewTeacherResource(s *db.Store, a *auth.Auth) *teacherResource {
 
 func (rs *teacherResource) Routes() chi.Router {
 	r := chi.NewRouter()
+	r.Use(rs.auth.Authenticator())
 
+	r.Get("/", rs.List)
 	r.Post("/", rs.Create)
 
-	r.Group(func(r chi.Router) {
-		r.Use(rs.auth.Authenticator())
-		r.Get("/", rs.List)
-
-		r.Route("/{teacherID}", func(r chi.Router) {
-			r.Use(rs.TeacherCtx)
-			r.Get("/", rs.FindOne)
-			r.Put("/", rs.Update)
-			r.Delete("/", rs.Delete)
-		})
+	r.Route("/{teacherID}", func(r chi.Router) {
+		r.Use(rs.TeacherCtx)
+		r.Get("/", rs.FindOne)
+		r.Put("/", rs.Update)
+		r.Delete("/", rs.Delete)
 	})
 
 	return r
@@ -58,11 +55,18 @@ func (t *TeacherRequest) Bind(r *http.Request) error {
 	if utf8.RuneCountInString(t.Name) > 50 {
 		return errors.New("teacher name is too long (max 50)")
 	}
+	if utf8.RuneCountInString(t.Name) < 2 {
+		return errors.New("teacher name is too short (min 2)")
+	}
 	if t.PasswordPlain == "" {
 		return nil
 	}
 	if utf8.RuneCountInString(t.PasswordPlain) > 50 {
-		return errors.New("too paranoid password (max 50)")
+		return errors.New("teacher password is too long (max 50)")
+	}
+	// :D
+	if utf8.RuneCountInString(t.PasswordPlain) < 8 {
+		return errors.New("teacher password is too short (min 8)")
 	}
 
 	return nil

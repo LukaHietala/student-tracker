@@ -5,8 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/go-chi/jwtauth/v5"
-	"github.com/lestrrat-go/jwx/v3/jwt"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -153,38 +151,8 @@ func (s *Store) VerifyTeacher(context context.Context, name, password string) (i
 	}
 }
 
-func (s *Store) GetSelf(ctx context.Context) (*Teacher, error) {
-	token, claims, _ := jwtauth.FromContext(ctx)
-
-	if token == nil || jwt.Validate(token) != nil {
-		return nil, fmt.Errorf("unable to validate teacher token")
-	}
-	teacherIDFloat, ok := claims["teacher_id"].(float64)
-	if !ok {
-		return nil, fmt.Errorf("unable to convert teacher_id to float")
-	}
-
-	query := `
-		SELECT id, name
-		FROM teachers
-		WHERE id = ?
-		LIMIT 1
-	`
-
-	t := new(Teacher)
-	err := s.db.QueryRowContext(ctx, query, int(teacherIDFloat)).Scan(&t.ID, &t.Name)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, nil
-		}
-		return nil, err
-	}
-
-	return t, nil
-}
-
 func hashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 12)
 	return string(bytes), err
 }
 

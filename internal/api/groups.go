@@ -33,19 +33,12 @@ func (rs *groupResource) Routes() chi.Router {
 		r.Use(rs.GroupCtx)
 		r.Get("/", rs.FindOne)
 		r.Put("/", rs.Update)
-		r.Delete("/", rs.Archive)
+		r.Delete("/", rs.Delete)
+
 		r.Route("/students", func(r chi.Router) {
 			r.Get("/", rs.ListStudents)
 			r.Get("/archived", rs.ListArchivedStudents)
 			r.Post("/", rs.CreateStudent)
-		})
-	})
-
-	r.Route("/archive", func(r chi.Router) {
-		r.Get("/", rs.ListArchived)
-		r.Route("/{groupID}", func(r chi.Router) {
-			r.Use(rs.GroupCtx)
-			r.Delete("/", rs.Delete)
 		})
 	})
 
@@ -115,7 +108,7 @@ func (rs *groupResource) GroupCtx(next http.Handler) http.Handler {
 }
 
 func (rs *groupResource) List(w http.ResponseWriter, r *http.Request) {
-	groups, err := rs.store.ListGroups(r.Context(), false)
+	groups, err := rs.store.ListGroups(r.Context())
 	if err != nil {
 		render.Render(w, r, ErrInternal(err))
 		return
@@ -174,31 +167,6 @@ func (rs *groupResource) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	render.Render(w, r, NewGroupResponse(currentGroup))
-}
-
-func (rs *groupResource) Archive(w http.ResponseWriter, r *http.Request) {
-	group, ok := r.Context().Value(groupContextKey).(*db.Group)
-	if !ok {
-		render.Render(w, r, ErrInternal(errors.New("context error")))
-		return
-	}
-
-	err := rs.store.ArchiveGroupByID(r.Context(), group.ID)
-	if err != nil {
-		render.Render(w, r, ErrInternal(err))
-		return
-	}
-
-	render.Render(w, r, NewGroupResponse(group))
-}
-
-func (rs *groupResource) ListArchived(w http.ResponseWriter, r *http.Request) {
-	groups, err := rs.store.ListGroups(r.Context(), true)
-	if err != nil {
-		render.Render(w, r, ErrInternal(err))
-		return
-	}
-	render.RenderList(w, r, NewGroupListResponse(groups))
 }
 
 func (rs *groupResource) Delete(w http.ResponseWriter, r *http.Request) {
