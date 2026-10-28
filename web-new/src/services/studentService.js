@@ -18,7 +18,7 @@ export const studentService = {
 			body: JSON.stringify(data),
 		}).then(handleResponse),
 
-	updateByID: (data, id) =>
+	updateByID: (id, data) =>
 		fetch(`${baseUrl}/${id}`, {
 			method: "PUT",
 			headers: {

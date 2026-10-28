@@ -72,16 +72,16 @@ func (s Schedule) Value() (driver.Value, error) {
 type Device struct {
 	ID        int    `json:"id"`
 	Name      string `json:"name"`
-	SecretKey string `json:"secret_key"`
+	SecretKey string `json:"secretKey"`
 }
 
 type Scan struct {
 	ID        int    `json:"id"`
 	UID       string `json:"uid"` // card uid
-	NewStatus string `json:"new_status"`
+	NewStatus string `json:"newStatus"`
 	Timestamp string `json:"timestamp"`
-	StudentID int    `json:"student_id"`
-	GroupID   int    `json:"group_id"`
+	StudentID int    `json:"studentId"`
+	GroupID   int    `json:"groupId"`
 }
 
 type Student struct {
@@ -89,27 +89,27 @@ type Student struct {
 	UID          string          `json:"uid"` // card uid
 	Name         string          `json:"name"`
 	Status       string          `json:"status"`
-	StartDate    string          `json:"start_date"` // time.DateOnly
-	EndDate      string          `json:"end_date"`
+	StartDate    string          `json:"startDate"` // time.DateOnly
+	EndDate      string          `json:"endDate"`
 	Schedule     Schedule        `json:"schedule"`
-	DoneSeconds  int             `json:"done_seconds"`
-	ExcludedDays JSONStringSlice `json:"excluded_days"`
-	BreakTime    int             `json:"break_time"` // in seconds
-	Remaining    int             `json:"remaining"`  // in seconds, dynamically calculated
-	IsArchived   bool            `json:"is_archived"`
-	GroupID      int             `json:"group_id"`
-	CreatedAt    string          `json:"created_at"`
+	DoneSeconds  int             `json:"doneSeconds"`
+	ExcludedDays JSONStringSlice `json:"excludedDays"`
+	BreakTime    int             `json:"breakTime"` // in seconds
+	Remaining    int             `json:"remaining"` // in seconds, dynamically calculated
+	IsArchived   bool            `json:"isArchived"`
+	GroupID      int             `json:"groupId"`
+	CreatedAt    string          `json:"createdAt"`
 }
 
 type Group struct {
 	ID        int    `json:"id"`
 	Name      string `json:"name"`
-	CreatedAt string `json:"created_at"`
+	CreatedAt string `json:"createdAt"`
 }
 
 type Teacher struct {
 	ID            int    `json:"id"`
 	Name          string `json:"name"`
-	PasswordPlain string `json:"password_plain,omitempty"`
-	PasswordHash  string `json:"password_hash,omitempty"`
+	PasswordPlain string `json:"passwordPlain,omitempty"`
+	PasswordHash  string `json:"passwordHash,omitempty"`
 }

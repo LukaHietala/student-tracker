@@ -42,7 +42,7 @@ func (rs *teacherResource) Routes() chi.Router {
 
 type TeacherRequest struct {
 	Name          string `json:"name"`
-	PasswordPlain string `json:"password_plain"`
+	PasswordPlain string `json:"passwordPlain"`
 }
 
 func (t *TeacherRequest) Bind(r *http.Request) error {

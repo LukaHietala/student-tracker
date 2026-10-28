@@ -57,12 +57,12 @@ type StudentRequest struct {
 	UID          string             `json:"uid"`
 	Name         string             `json:"name"`
 	Status       string             `json:"status"`
-	StartDate    string             `json:"start_date"`
-	EndDate      string             `json:"end_date"`
+	StartDate    string             `json:"startDate"`
+	EndDate      string             `json:"endDate"`
 	Schedule     db.Schedule        `json:"schedule"`
-	DoneSeconds  int                `json:"done_seconds"`
-	ExcludedDays db.JSONStringSlice `json:"excluded_days"`
-	BreakTime    int                `json:"break_time"`
+	DoneSeconds  int                `json:"doneSeconds"`
+	ExcludedDays db.JSONStringSlice `json:"excludedDays"`
+	BreakTime    int                `json:"breakTime"`
 }
 
 func (s *StudentRequest) Bind(r *http.Request) error {

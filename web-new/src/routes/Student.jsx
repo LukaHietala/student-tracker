@@ -13,13 +13,25 @@ function StudentPage() {
 
 		const [showScans, setShowScans] = createSignal(false);
 
-		const [student] = createResource(
+		const [student, { refetch }] = createResource(
 				() => user() && user().id,
 				async () => {
 						return await studentService.findByID(params.id);
 				},
 		);
 
+        const editStudent = async (data) => {
+            data.breakTime *= 60 // backend takes in seconds
+
+            try {
+                await studentService.updateByID(student().id, data)
+            } catch (e) {
+                console.error(e.message)
+            }
+
+            await refetch();
+        };
+        
 		return (
 				<ErrorBoundary fallback={<p>Could not fetch student</p>}>
 						<Suspense fallback={<p>Loading student...</p>}>
@@ -36,7 +48,7 @@ function StudentPage() {
 								<Show when={showScans()}>
 										<Scans id={student().id}/>
 								</Show>
-								<EditStudent/>
+								<EditStudent student={student} onSubmit={editStudent}/>
 						</Suspense>
 				</ErrorBoundary>
 		);
