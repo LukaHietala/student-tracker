@@ -15,6 +15,7 @@ function GroupsPage() {
 
 		return (
 				<ErrorBoundary fallback={<p>Could not fetch groups</p>}>
+                        <h3>Groups</h3>
 						<Suspense fallback={<p>Loading groups...</p>}>
 								<GroupList groups={groups}/>
 						</Suspense>

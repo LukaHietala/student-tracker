@@ -4,13 +4,9 @@ function GroupItem(props) {
 		const navigate = useNavigate();
 		
 		return (
-				<>
-						<button onClick={() => {
-												navigate(`/groups/${props.group.id}`, { replace: true });
-										}}>
-								{props.group.name}
-						</button>
-				</>
+				<a href={`/groups/${props.group.id}`}>
+                    {props.group.name}
+				</a>
 		);
 }
 

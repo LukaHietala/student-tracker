@@ -11,12 +11,14 @@ function StudentPage() {
 		const params = useParams();
 		const navigate = useNavigate();
 
-		const [showScans, setShowScans] = createSignal(false);
+		const [tab, setTab] = createSignal("normal");
 
 		const [student, { refetch }] = createResource(
 				() => user() && user().id,
 				async () => {
-						return await studentService.findByID(params.id);
+						const student = await studentService.findByID(params.id);
+                        student.breakTime /= 60
+                        return student
 				},
 		);
 
@@ -35,20 +37,32 @@ function StudentPage() {
 		return (
 				<ErrorBoundary fallback={<p>Could not fetch student</p>}>
 						<Suspense fallback={<p>Loading student...</p>}>
-								{JSON.stringify(student())}
-								<button onClick={() => {
-														studentService.archiveByID(student().id);
-														navigate(`/groups/${student().group_id}`, { replace: true });
-												}}>
-										Arkistoi
-								</button>
-								<button onClick={() => setShowScans(!showScans())}>
-										Skannaukset
-								</button>
-								<Show when={showScans()}>
-										<Scans id={student().id}/>
-								</Show>
-								<EditStudent student={student} onSubmit={editStudent}/>
+                            <button onClick={() => setTab("normal") }>
+                                Normal
+							</button>
+                            <button onClick={() => setTab("edit") }>
+                                Edit
+							</button>
+                            <button onClick={() => setTab("scans") }>
+                                Scans 
+							</button>
+							<button onClick={() => {
+								studentService.archiveByID(student().id);
+								navigate(`/groups/${student().groupId}`, { replace: true });
+							}}>
+							    Arkistoi
+							</button>
+                            <Switch fallback={<p>Jaakon puutarha</p>}>
+                                <Match when={tab() === "normal"}>
+                                    <div>{JSON.stringify(student())}</div>
+                                </Match>
+                                <Match when={tab() === "scans"}>
+                                            <Scans id={student().id}/>
+                                </Match>
+                                <Match when={tab() === "edit"}>
+                                        <EditStudent student={student} onSubmit={editStudent}/>
+                                </Match>
+                          </Switch>
 						</Suspense>
 				</ErrorBoundary>
 		);

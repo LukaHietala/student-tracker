@@ -6,14 +6,19 @@ function MainLayout(props) {
 		<>
 			<Show when={user()}>
 				{(user) => (
-					<nav>
-						<span>Moi {user().name}</span>
-						<a href="/">Groups</a>
-						<a href="/logout">Logout</a>
+					<nav class="navbar">
+                        <div>
+                            <a href="/" class="btn-link">Groups</a>
+                            <a href="/teachers" class="btn-link">Teachers</a>
+                            <a href="/archive" class="btn-link">Archive</a>
+                        </div>
+                        <div>
+                            <a href="/logout" class="btn-link">Logout</a>
+                        </div>
 					</nav>
 				)}
 			</Show>
-			<main>{props.children}</main>
+			<main class="container">{props.children}</main>
 		</>
 	);
 }

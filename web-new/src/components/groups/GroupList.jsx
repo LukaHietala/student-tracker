@@ -2,13 +2,13 @@ import GroupItem from "./GroupItem.jsx";
 
 function GroupList(props) {
 		return (
-				<ul>
+				<div class="list">
 						<For each={props.groups()}>{(item) =>
-								<li>
+								<div class="item">
 										<GroupItem group={item}/>
-								</li>
+								</div>
 						}</For>
-				</ul>
+				</div>
 		);
 }
 

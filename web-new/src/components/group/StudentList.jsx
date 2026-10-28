@@ -2,15 +2,13 @@ import StudentItem from "./StudentItem.jsx";
 
 function StudentList(props) {
 		return (
-				<>
-						<ul>
-								<For each={props.students()}>{(item) =>
-										<li>
-												<StudentItem student={item}/>
-										</li>
-								}</For>
-						</ul>
-				</>
+				<div class="list">
+                    <For each={props.students()}>{(item) =>
+                            <div class="item">
+                                    <StudentItem student={item}/>
+                            </div>
+                    }</For>
+				</div>
 		);
 }
 

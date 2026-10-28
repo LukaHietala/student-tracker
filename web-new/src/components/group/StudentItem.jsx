@@ -2,15 +2,13 @@ import { useNavigate } from "@solidjs/router";
 
 function StudentItem(props) {
 		const navigate = useNavigate();
-		
+		const student = props.student
+        const title = `${student.name} - ${student.remaining} ${student.status == 'IN' ? 'Status: Inside' : 'Status: Outside'}`
 		return (
-				<>
-						<button onClick={() => {
-												navigate(`/students/${props.student.id}`, { replace: true });
-										}}>
-								{props.student.name}
-						</button>
-				</>
+            <>
+                <span>{title}</span><br />
+                <span class="small">{"Card UID: " + student.uid}</span>
+            </>
 		);
 }
 
