@@ -64,31 +64,32 @@ function Calendar(props)
 												<tr>
 														<For each={[...days.keys()]}>
 																{(_,j) => (
-																		<td style={{ color: (getInput(props.studentForm, { path: ["schedule", j()] }) != null
-																												 &&
-																												 (getInput(props.studentForm, { path: ["excludedDays"] }) == undefined ||
-																													!getInput(props.studentForm, { path: ["excludedDays"] }).includes(`${year()}-${month()}-${pad(i()*7+j()+1-startDay())}`)
-																												 ))
-																								 ? "black" : "red" }}>
-																				{((i() > 0 || j() > (startDay() - 1))
-																					&&
-																					(i()*7 + j() + 1 - startDay() <= daysInMonth(year(), month())))
-																				 ? i()*7 + j() + 1 - startDay() : ""
-																				}
-																				<button
-																						type="button"
-																						onClick={() => {
-																								const xs = getInput(props.studentForm, { path: ["excludedDays"] });
-																								const x = `${year()}-${month()}-${pad(i()*7+j()+1-startDay())}`;
-																								if (xs.includes(x)) {
-																										const index = xs.indexOf(x);
-																										xs.splice(index, 1);
-																								} else {
-																										xs.push(x);
-																								}
-																								setInput(props.studentForm, { path: ["excludedDays"], input: xs });
-																						}}>
-																				</button>
+																		<td style={{ "background-color":
+																								 (getInput(props.studentForm, { path: ["schedule", j()] }) != null
+																									&&
+																									(getInput(props.studentForm, { path: ["excludedDays"] }) == undefined ||
+																									 !getInput(props.studentForm, { path: ["excludedDays"] }).includes(`${year()}-${month()}-${pad(i()*7+j()+1-startDay())}`)
+																									))
+																								 ? "" : "red" }}>
+																				<Show when={((i() > 0 || j() > (startDay() - 1))
+																							&&
+																							(i()*7 + j() + 1 - startDay() <= daysInMonth(year(), month())))}>
+																						<button
+																								type="button"
+																								onClick={() => {
+																										const xs = getInput(props.studentForm, { path: ["excludedDays"] });
+																										const x = `${year()}-${month()}-${pad(i()*7+j()+1-startDay())}`;
+																										if (xs.includes(x)) {
+																												const index = xs.indexOf(x);
+																												xs.splice(index, 1);
+																										} else {
+																												xs.push(x);
+																										}
+																										setInput(props.studentForm, { path: ["excludedDays"], input: xs });
+																								}}>
+																								{ i()*7 + j() + 1 - startDay() }
+																						</button>
+																				</Show>
 																		</td>
 																)}
 														</For>

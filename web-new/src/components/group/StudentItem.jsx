@@ -3,11 +3,17 @@ import { useNavigate } from "@solidjs/router";
 function StudentItem(props) {
 		const navigate = useNavigate();
 		const student = props.student
-        const title = `${student.name} - ${student.remaining} ${student.status == 'IN' ? 'Status: Inside' : 'Status: Outside'}`
 		return (
             <>
-                <span>{title}</span><br />
-                <span class="small">{"Card UID: " + student.uid}</span>
+                <div>
+                    <span>{student.name}</span><br />
+                    <span class="small">
+                        {`${student.status === "IN" ? "Tila: Sisällä" : "Tila: Ulkona"} - Kortin UID: ${student.uid}`}
+                    </span>
+                </div>
+                <div>
+                    <button class="btn-primary" onClick={() => {navigate(`/students/${student.id}`)}}>Näytä</button>
+                </div>
             </>
 		);
 }

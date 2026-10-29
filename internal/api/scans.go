@@ -126,6 +126,11 @@ func (rs *scanResource) ListByStudent(w http.ResponseWriter, r *http.Request) {
 	render.RenderList(w, r, NewScanListResponse(scans))
 }
 
+type NewScan struct {
+	*db.Scan
+	Name string `json:"name"` // student name
+}
+
 func (rs *scanResource) Create(w http.ResponseWriter, r *http.Request) {
 	data := &ScanRequest{}
 	if err := render.Bind(r, data); err != nil {
@@ -139,7 +144,7 @@ func (rs *scanResource) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newScan := &db.Scan{
+	scan := &db.Scan{
 		UID:       data.UID,
 		Timestamp: time.Unix(data.Timestamp, 0).Format(time.DateTime),
 	}
@@ -148,7 +153,7 @@ func (rs *scanResource) Create(w http.ResponseWriter, r *http.Request) {
 	if err != nil || student == nil || student.IsArchived {
 		// If no student found it will send the scan event but with student id
 		// and group id as 0
-		if bytes, err := json.Marshal(newScan); err == nil {
+		if bytes, err := json.Marshal(scan); err == nil {
 			rs.hub.Broadcast(websockets.Event{
 				Event:   "scan:new",
 				Payload: bytes,
@@ -176,13 +181,18 @@ func (rs *scanResource) Create(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	newScan.StudentID = student.ID
-	newScan.GroupID = student.GroupID
-	newScan.NewStatus = student.Status
+	scan.StudentID = student.ID
+	scan.GroupID = student.GroupID
+	scan.NewStatus = student.Status
 
-	if err := rs.store.NewScan(r.Context(), newScan); err != nil {
+	if err := rs.store.NewScan(r.Context(), scan); err != nil {
 		render.Render(w, r, ErrInternal(err))
 		return
+	}
+
+	newScan := &NewScan{
+		Scan: scan,
+		Name: student.Name,
 	}
 
 	if bytes, err := json.Marshal(newScan); err == nil {

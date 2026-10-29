@@ -18,7 +18,7 @@ export const groupService = {
 			body: JSON.stringify(data),
 		}).then(handleResponse),
 
-	updateByID: (data, id) =>
+	updateByID: (id, data) =>
 		fetch(`${baseUrl}/${id}`, {
 			method: "PUT",
 			headers: {
@@ -30,6 +30,15 @@ export const groupService = {
 	archiveByID: (id) =>
 		fetch(`${baseUrl}/${id}`, {
 			method: "DELETE",
+		}).then(handleResponse),
+
+    createStudent: (id, data) =>
+		fetch(`${baseUrl}/${id}/students`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(data),
 		}).then(handleResponse),
 
 	listGroupStudents: (id) => fetch(`${baseUrl}/${id}/students`).then(handleResponse),

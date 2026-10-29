@@ -1,16 +1,18 @@
 import { createForm, Field, FieldArray, Form, reset, setInput, getInput } from "@formisch/solid";
 import { createResource, createSignal, createEffect } from "solid-js";
-import { studentService } from "../../services";
+import { studentService } from "../../services"; // Turha?
 import { useAuth } from "../../context/AuthContext.jsx";
 import { useParams } from "@solidjs/router";
 import { useNavigate } from "@solidjs/router";
 import { studentSchema } from "./schema.js"
 import Calendar from "../common/Calendar";
+import { useWebSocket } from "../../context/WebsocketContext.jsx";
 
 function EditStudent(props)
 {
     // Asiatonta
     const student = props.student;
+    const cancel = () => props.cancel
 
     const handleSubmit = async (data) => {
         await props.onSubmit(data);
@@ -29,7 +31,12 @@ function EditStudent(props)
         }
     });
 
-    const title = `Editing student: Jaakko`
+		const ws = useWebSocket();
+		ws.addEventListener('message', event => {
+				const uid = JSON.parse(event.data).payload.uid;
+				if (uid)
+						setInput(studentEditForm, { path: ["uid"], input: uid });
+		});
 
     return (
         <Form
@@ -38,7 +45,7 @@ function EditStudent(props)
             class="form"
         >
             <div class="form-block">
-                <span>{title}</span> 
+								<span>Editing student: {getInput(studentEditForm, { path: ["name"]})}</span> 
             </div>
             <div class="form-block">
                 <span>Basics</span><br />
@@ -242,7 +249,12 @@ function EditStudent(props)
 										<Calendar studentForm={studentEditForm}/>
 								</Show>
             </div>
-            <button type="submit">Submit</button>
+            <div class="form-block">
+                <div style="display: inline-flex; gap: 4px;">
+                    <button class="btn-secondary" type="button" onClick={() => cancel()}>Peruuta</button>
+                    <button class="btn-primary" type="submit">Tallenna</button>
+                </div>
+            </div>
         </Form>
     )
 }

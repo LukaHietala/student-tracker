@@ -3,30 +3,30 @@ import { handleResponse } from ".";
 const baseUrl = "/api/teachers";
 
 export const teacherService = {
-	listAll: () => fetch(`${baseUrl}/`).then(handleResponse),
+		listAll: () => fetch(`${baseUrl}/`).then(handleResponse),
 
-	findByID: (id) => fetch(`${baseUrl}/${id}`).then(handleResponse),
+		findByID: (id) => fetch(`${baseUrl}/${id}`).then(handleResponse),
 
-	create: (data) =>
+		create: (data) =>
 		fetch(`${baseUrl}/`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify(data),
+				method: "POST",
+				headers: {
+						"Content-Type": "application/json",
+				},
+				body: JSON.stringify(data),
 		}).then(handleResponse),
 
-	updateByID: (data, id) =>
+		updateByID: (data, id) =>
 		fetch(`${baseUrl}/${id}`, {
-			method: "PUT",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify(data),
+				method: "PUT",
+				headers: {
+						"Content-Type": "application/json",
+				},
+				body: JSON.stringify(data),
 		}).then(handleResponse),
 
-	deleteByID: (id) =>
+		deleteByID: (id) =>
 		fetch(`${baseUrl}/${id}`, {
-			method: "DELETE",
+				method: "DELETE",
 		}).then(handleResponse),
 };

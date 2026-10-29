@@ -2,11 +2,20 @@ import { useNavigate } from "@solidjs/router";
 
 function GroupItem(props) {
 		const navigate = useNavigate();
+        const group = props.group
 		
 		return (
-				<a href={`/groups/${props.group.id}`}>
-                    {props.group.name}
-				</a>
+            <>
+                <div>
+                    <span>{group.name}</span><br />
+                    <span class="small">
+                        {`Luotu: ${group.createdAt}`}
+                    </span>
+                </div>
+                <div>
+                    <button class="btn-primary" onClick={() => {navigate(`/groups/${group.id}`)}}>Näytä</button>
+                </div>
+            </>
 		);
 }
 
