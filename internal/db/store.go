@@ -32,8 +32,7 @@ var schema = `
         break_time INTEGER NOT NULL DEFAULT 0,
 		is_archived BOOL NOT NULL DEFAULT FALSE,
 		group_id INTEGER NOT NULL,
-        created_at TEXT NOT NULL DEFAULT (datetime(current_timestamp, 'localtime')),
-		FOREIGN KEY(group_id) REFERENCES groups(id) ON DELETE CASCADE
+        created_at TEXT NOT NULL DEFAULT (datetime(current_timestamp, 'localtime'))
     );
 
     CREATE TABLE IF NOT EXISTS scans (

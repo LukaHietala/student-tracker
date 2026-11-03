@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 
 	"golang.org/x/crypto/bcrypt"
@@ -120,6 +121,25 @@ func (s *Store) DeleteTeacherByID(ctx context.Context, id int) error {
 	}
 
 	return nil
+}
+
+func (s *Store) IsTeacherNameAvailable(ctx context.Context, name string) (bool, error) {
+	query := `
+		SELECT id, name
+		FROM teachers
+		WHERE name = ? LIMIT 1
+	`
+
+	var teacher Teacher
+	err := s.db.QueryRowContext(ctx, query, name).Scan(&teacher.ID, &teacher.Name)
+	if errors.Is(err, sql.ErrNoRows) {
+		return true, nil
+	}
+	if err != nil {
+		return false, err
+	}
+
+	return false, nil
 }
 
 func (s *Store) TeacherCount() (int, error) {

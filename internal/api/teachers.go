@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"errors"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -29,6 +30,7 @@ func (rs *teacherResource) Routes() chi.Router {
 
 	r.Get("/", rs.List)
 	r.Post("/", rs.Create)
+	r.Post("/available", rs.Available)
 
 	r.Route("/{teacherID}", func(r chi.Router) {
 		r.Use(rs.TeacherCtx)
@@ -197,4 +199,33 @@ func (rs *teacherResource) Delete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	render.Render(w, r, NewTeacherResponse(teacher))
+}
+
+type AvailableResponse struct {
+	OK bool `json:"ok"`
+}
+
+func NewAvailableResponse(ok bool) *AvailableResponse {
+	return &AvailableResponse{OK: ok}
+}
+
+func (a *AvailableResponse) Render(w http.ResponseWriter, r *http.Request) error {
+	return nil
+}
+
+func (rs *teacherResource) Available(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	name, err := io.ReadAll(r.Body)
+	if err != nil {
+		render.Render(w, r, ErrInvalidRequest(err))
+		return
+	}
+
+	available, err := rs.store.IsTeacherNameAvailable(r.Context(), string(name))
+	if err != nil {
+		render.Render(w, r, ErrInternal(err))
+		return
+	}
+
+	render.Render(w, r, NewAvailableResponse(available))
 }
