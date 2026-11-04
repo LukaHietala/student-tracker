@@ -4,8 +4,8 @@ export const deviceSchema = v.pipe(
 	v.object({
 		name: v.pipe(
 			v.string(),
-			v.minLength(3, "Name must have at least 3 characters"),
-			v.maxLength(50, "Name can have at most 50 characters"),
+			v.minLength(3, "Nimessä on oltava vähintään 3 merkkiä"),
+			v.maxLength(50, "Nimessä saa olla enintään 50 merkkiä"),
 		),
 	})
 )

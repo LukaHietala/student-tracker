@@ -4,6 +4,7 @@ import { studentService } from "../services";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useNavigate } from "@solidjs/router";
 import Scans from "../components/common/Scans";
+import ReadonlyCalendar from "../components/common/ReadonlyCalendar";
 import EditStudent from "../components/student/EditStudent";
 
 const days = ["Ma", "Ti", "Ke", "To", "Pe", "La", "Su"]
@@ -61,7 +62,7 @@ function StudentPage() {
                         </div>
                         <h4>Perustiedot</h4>
                         <div class="block-col">
-                            <span>Kortin UID: {student().uid}</span><br/>
+                            <span>Kortin UID: <code>{student().uid}</code></span><br/>
                             <span>Työjakso: {student().startDate} - {student().endDate}</span>
                         </div>
                         <h4>Tilanne</h4>
@@ -81,7 +82,8 @@ function StudentPage() {
                             </For>
                         </div>
                         <h4>Kalenteri</h4>
-                        <div class="block-col">
+                        <div class="block-col" style="padding: 0;">
+                            <ReadonlyCalendar schedule={student().schedule} excludedDays={student().excludedDays} />
                         </div>
                         <h4>Muut tiedot</h4>
                         <div class="block-col">

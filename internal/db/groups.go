@@ -142,7 +142,6 @@ func (s *Store) DeleteGroupByID(ctx context.Context, id int) error {
 			UPDATE students
 			SET is_archived = TRUE,
 				status = 'OUT',
-				group_id = 0,
 				uid = ?
 			WHERE id = ?
 		`

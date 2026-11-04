@@ -104,7 +104,10 @@ function ReaderGuide() {
                     Asenna <a href="https://go.dev/dl/" target="_blank" rel="noopener noreferrer">Go</a> (vähintään versio 1.27.0)
                 </li>
                  <li>
-                    Kloonaa projektin lähdekoodi <a href="https://github.com/LukaHietala/kpedu-student-tracker" target="_blank" rel="noopener noreferrer">Githubista</a>
+                    Kloonaa projektin lähdekoodi <a href="https://github.com/LukaHietala/kpedu-student-tracker" target="_blank" rel="noopener noreferrer">Githubista</a>. Lukija sijaitsee kansiossa <code>reader/</code>.
+                </li>
+                <li>
+                    TODO: Config, systemd
                 </li>
 			</ol>
 		</div>

@@ -11,7 +11,7 @@ const timeslot = v.pipe(
 			(input) => {
 				return input.end > input.start;
 			},
-			"End time must be after start time",
+			"Aloitus ajan tulee olla ennen lopetus aikaa",
 		),
 		["end"],
 	),
@@ -21,8 +21,8 @@ export const studentSchema = v.pipe(
 	v.object({
 		name: v.pipe(
 			v.string(),
-			v.minLength(3, "Name must have at least 3 characters"),
-			v.maxLength(50, "Name can have at most 50 characters"),
+			v.minLength(3, "Nimessä tulee olla vähintään 3 merkkiä"),
+			v.maxLength(50, "Nimissä voi olla enintään 50 merkkiä"),
 		),
 		uid: v.pipe(v.string()),
 		status: v.picklist(["IN", "OUT"]),
@@ -38,7 +38,7 @@ export const studentSchema = v.pipe(
 			(input) => {
 				return input.endDate > input.startDate;
 			},
-			"End date must be after start date",
+			"Aloituspäivän tulee olla ennen lopetuspäivää",
 		),
 		["endDate"],
 	),

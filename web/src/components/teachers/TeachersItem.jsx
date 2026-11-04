@@ -1,7 +1,5 @@
 import { createSignal } from "solid-js";
 import TeacherForm from "./TeacherForm.jsx";
-import penIcon from "../../assets/pen.svg"
-import canIcon from "../../assets/can.svg"
 
 function TeachersItem(props) {
 		const teacher = props.teacher;
@@ -21,16 +19,16 @@ function TeachersItem(props) {
 								</div>
 								<div style="display: inline-flex; gap: 4px;">
 										<button
-												class="btn-icon"
+												class="btn-secondary"
 												onClick={() => setEditing(!editing())}
 										>
-                        <img src={penIcon} alt="Muokkaa" />
+                                            Muokkaa
 										</button>
 										<button
-												class="btn-icon"
+												class="btn-primary"
 												onClick={() => props.deleteTeacher(teacher.id)}
 										>
-                        <img src={canIcon} alt="Poista" />
+                                            Poista
 										</button>
 								</div>
 						</div>

@@ -6,6 +6,20 @@ function Calendar(props) {
 	const [month, setMonth] = createSignal(new Date().getMonth() + 1);
 
 	const days = ["Ma", "Ti", "Ke", "To", "Pe", "La", "Su"];
+	const months = [
+		"Tammikuu",
+		"Helmikuu",
+		"Maaliskuu",
+		"Huhtikuu",
+		"Toukokuu",
+		"Kesäkuu",
+		"Heinäkuu",
+		"Elokuu",
+		"Syyskuu",
+		"Lokakuu",
+		"Marraskuu",
+		"Joulukuu",
+	];
 	const [rows, setRows] = createSignal([]);
 	const [startDay, setStartDay] = createSignal(0);
 
@@ -26,9 +40,10 @@ function Calendar(props) {
 	return (
 		<div class="calendar">
 			<div class="calendar-title">
-				{year()} - {month()}
-				<div>
+				{months[month() - 1]} {year()}
+				<div style="display: inline-flex; gap: 4px;">
 					<button
+						class="btn-icon"
 						onClick={() => {
 							setMonth(month() - 1);
 							if (month() <= 0) {
@@ -42,6 +57,7 @@ function Calendar(props) {
 						←
 					</button>
 					<button
+						class="btn-icon"
 						onClick={() => {
 							setMonth(month() + 1);
 							if (month() >= 13) {
@@ -57,69 +73,75 @@ function Calendar(props) {
 				</div>
 			</div>
 			<table class="calendar-table">
-				<tr>
-					<For each={days}>{(day, _) => <th>{day()}</th>}</For>
-				</tr>
-				<For each={rows()}>
-					{(_, i) => (
-						<tr>
-							<For each={[...days.keys()]}>
-								{(_, j) => (
-									<td class="calendar-box">
-										<Show
-											when={
-												(i() > 0 || j() > startDay() - 1) &&
-												i() * 7 + j() + 1 - startDay() <=
-													daysInMonth(year(), month())
-											}
-										>
-											<button
-												type="button"
-												classList={{
-													"calendar-box-button": true,
-													"calendar-active":
-														getInput(props.studentForm, {
-															path: ["schedule", j()],
-														}) != null &&
-														(getInput(props.studentForm, {
-															path: ["excludedDays"],
-														}) == undefined ||
-															!getInput(props.studentForm, {
-																path: ["excludedDays"],
-															}).includes(
-																`${year()}-${month()}-${pad(i() * 7 + j() + 1 - startDay())}`,
-															))
-															? false
-															: true,
-												}}
-
-												onClick={() => {
-													const xs = getInput(props.studentForm, {
-														path: ["excludedDays"],
-													});
-													const x = `${year()}-${month()}-${pad(i() * 7 + j() + 1 - startDay())}`;
-													if (xs.includes(x)) {
-														const index = xs.indexOf(x);
-														xs.splice(index, 1);
-													} else {
-														xs.push(x);
-													}
-													setInput(props.studentForm, {
-														path: ["excludedDays"],
-														input: xs,
-													});
-												}}
+				<tbody>
+					<tr>
+						<For each={days}>{(day, _) => <th>{day()}</th>}</For>
+					</tr>
+					<For each={rows()}>
+						{(_, i) => (
+							<tr>
+								<For each={[...days.keys()]}>
+									{(_, j) => (
+										<td class="calendar-box">
+											<Show
+												when={
+													(i() > 0 || j() > startDay() - 1) &&
+													i() * 7 + j() + 1 - startDay() <=
+														daysInMonth(year(), month())
+												}
 											>
-												{i() * 7 + j() + 1 - startDay()}
-											</button>
-										</Show>
-									</td>
-								)}
-							</For>
-						</tr>
-					)}
-				</For>
+												<button
+													type="button"
+													classList={{
+														"calendar-box-button": true,
+														"calendar-active":
+															getInput(props.studentForm, {
+																path: ["schedule", j()],
+															}) != null &&
+															(getInput(props.studentForm, {
+																path: ["excludedDays"],
+															}) == undefined ||
+																!getInput(props.studentForm, {
+																	path: ["excludedDays"],
+																}).includes(
+																	`${year()}-${month()}-${pad(i() * 7 + j() + 1 - startDay())}`,
+																))
+																? false
+																: true,
+													}}
+
+													onClick={() => {
+														const xs = getInput(props.studentForm, {
+															path: ["excludedDays"],
+														});
+														const x = `${year()}-${month()}-${pad(i() * 7 + j() + 1 - startDay())}`;
+														if (xs.includes(x)) {
+															const index = xs.indexOf(x);
+															xs.splice(index, 1);
+														} else {
+															xs.push(x);
+														}
+														setInput(props.studentForm, {
+															path: ["excludedDays"],
+															input: xs,
+														});
+													}}
+												>
+													{i() * 7 + j() + 1 - startDay()}
+												</button>
+											</Show>
+										</td>
+									)}
+								</For>
+							</tr>
+						)}
+					</For>
+				</tbody>
 			</table>
+			<div class="calendar-info">
+				<div class="calendar-info-dot"></div>
+				<small>- Vapaapäivä</small>
+			</div>
 		</div>
 	);
 }

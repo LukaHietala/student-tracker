@@ -34,10 +34,21 @@ function EditStudent(props)
 
 		const ws = useWebSocket();
 		ws.addEventListener('message', event => {
-				const uid = JSON.parse(event.data).payload.uid;
-				if (uid)
-						setInput(studentEditForm, { path: ["uid"], input: uid });
+				const data = JSON.parse(event.data);
+
+                if (data.event !== "scan:new") {
+                    return;
+                }
+                
+                if (data.payload.groupId !== 0) {
+                    return;
+                }
+
+				if (data.payload.uid)
+						setInput(studentEditForm, { path: ["uid"], input: data.payload.uid });
 		});
+
+    const days = ["Maanantai", "Tiistai", "Keskiviiko", "Torstai", "Perjantai", "Launtai", "Sunnuntai"]
 
     return (
         <Form
@@ -49,8 +60,8 @@ function EditStudent(props)
 								<span>{title}</span> 
             </div>
             <div class="form-block">
-                <span>Basics</span><br />
-                <small>Student&apos;s basic info</small>
+                <span>Perustiedot</span><br />
+                <small>Opiskelijan perustiedot.</small>
             </div>
             <div class="form-block">
                 <Field
@@ -59,7 +70,7 @@ function EditStudent(props)
                 >
                     {(field) => (
                         <div>
-                            <label for={field.props.name}>Name:</label><br />
+                            <label for={field.props.name}>Nimi:</label><br />
                             <input
                                 {...field.props}
                                 id={field.props.name}
@@ -77,13 +88,14 @@ function EditStudent(props)
                 >
                     {(field) => (
                         <div>
-                            <label for={field.props.name}>UID:</label><br />
+                            <label for={field.props.name}>Kortin UID:</label><br />
                             <input
                                 {...field.props}
                                 id={field.props.name}
                                 value={field.input}
                                 type="text"
                                 required
+                                placeholder="Skannaa tyhjä kortti"
                                 disabled
                             />
                             {field.errors && <small class="form-error">{field.errors[0]}</small>}
@@ -96,12 +108,12 @@ function EditStudent(props)
                 >
                     {(field) => (
                         <div>
-                            <label for={field.props.name}>Status:</label><br />
+                            <label for={field.props.name}>Tila:</label><br />
                             <select {...field.props}>
                                 <For
                                     each={[
-                                        { label: 'In', value: 'IN' },
-                                        { label: 'Out', value: 'OUT' },
+                                        { label: 'Sisällä', value: 'IN' },
+                                        { label: 'Ulkona', value: 'OUT' },
                                     ]}
                                 >
                                     {({ label, value }) => (
@@ -117,8 +129,8 @@ function EditStudent(props)
                 </Field>
             </div>
             <div class="form-block">
-                <span>Basics</span><br />
-                <small>Student&apos;s basic info</small>
+                <span>Jakso</span><br />
+                <small>Oppilaan työjakso.</small>
             </div>
             <div class="form-block">
                 <Field
@@ -127,7 +139,7 @@ function EditStudent(props)
                 >
                     {(field) => (
                         <div>
-                            <label for={field.props.name}>Start date:</label><br />
+                            <label for={field.props.name}>Aloituspäivä:</label><br />
                             <input
                                 {...field.props}
                                 id={field.props.name}
@@ -145,7 +157,7 @@ function EditStudent(props)
                 >
                     {(field) => (
                         <div>
-                            <label for={field.props.name}>End date:</label><br />
+                            <label for={field.props.name}>Lopetuspäivä:</label><br />
                             <input
                                 {...field.props}
                                 id={field.props.name}
@@ -159,32 +171,8 @@ function EditStudent(props)
                 </Field>
             </div>
             <div class="form-block">
-                <span>Basics</span><br />
-                <small>Student&apos;s basic info</small>
-            </div>
-            <div class="form-block">
-                <Field
-                    of={studentEditForm}
-                    path={["breakTime"]}
-                >
-                    {(field) => (
-                        <div>
-                            <label for={field.props.name}>Break time (in minutes):</label><br />
-                            <input
-                                {...field.props}
-                                id={field.props.name}
-                                value={field.input}
-                                type="number"
-                                required
-                            />
-                            {field.errors && <small class="form-error">{field.errors[0]}</small>}
-                        </div>
-                    )}
-                </Field>
-            </div>
-            <div class="form-block">
-                <span>Basics</span><br />
-                <small>Student&apos;s basic info</small>
+                <span>Aikataulu</span><br />
+                <small>Aikataulu määrittää työajat viikonpäivä kohtaisesti.</small>
             </div>
             <div class="form-block schedule">
                 <FieldArray of={studentEditForm} path={['schedule']}>
@@ -193,10 +181,11 @@ function EditStudent(props)
                             {fieldArray.items.map((item, index) => (
                                 <Show when={item}>
                                     <div key={index} class="schedule-item">
+                                        <span class="small">{days[index]}</span>
                                         <Show when={getInput(studentEditForm, { path: ["schedule", index] }) != null}
                                               fallback={
                                                   <div>
-                                                      Free day
+                                                      Vapaa
                                                   </div>
                                               }>
                                             <Field of={studentEditForm} path={['schedule', index, 'start']}>
@@ -242,13 +231,38 @@ function EditStudent(props)
                 </FieldArray>
             </div>
             <div class="form-block">
-                <span>Basics</span><br/>
-                <small>Student&apos;s basic info</small>
+                <span>Kalenteri</span><br/>
+                <small>Voit merkata päivä vapaaksi. Päivät jotka ovat merkattu sinisellä ovat vapaita.</small>
             </div>
             <div class="form-block" style="padding:0;">
 								<Show when={getInput(studentEditForm)}>
 										<Calendar studentForm={studentEditForm}/>
 								</Show>
+            </div>
+            <div class="form-block">
+                <span>Muuta</span><br />
+                <small>Lisätietoja oppilaasta.</small>
+            </div>
+            <div class="form-block">
+                <Field
+                    of={studentEditForm}
+                    path={["breakTime"]}
+                >
+                    {(field) => (
+                        <div>
+                            <label for={field.props.name}>Tauko per päivä</label><br />
+                            <input
+                                {...field.props}
+                                id={field.props.name}
+                                value={field.input}
+                                type="number"
+                                required
+                            />
+                            <small>min</small>
+                            {field.errors && <small class="form-error">{field.errors[0]}</small>}
+                        </div>
+                    )}
+                </Field>
             </div>
             <div class="form-block">
                 <div style="display: inline-flex; gap: 4px;">

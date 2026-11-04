@@ -11,7 +11,7 @@ const timeslot = v.pipe(
 						(input) => {
 								return input.end > input.start;
 						},
-						"End time must be after start time",
+						"Aloitus ajan tulee olla ennen lopetus aikaa",
 				),
 				["end"],
 		),
@@ -28,7 +28,7 @@ export const timeSchema = v.pipe(
 						(input) => {
 								return input.endDate > input.startDate;
 						},
-						"End date must be after start date",
+						"Aloituspäivän tulee olla ennen lopetuspäivää",
 				),
 				["endDate"],
 		)

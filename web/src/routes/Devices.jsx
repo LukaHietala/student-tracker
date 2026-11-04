@@ -65,10 +65,12 @@ function DevicePage() {
 					/>
 				</Show>
 				<Suspense fallback={<p>Ladataan...</p>}>
-					<DeviceList
-						devices={devices}
-						deleteDevice={deleteDevice}
-					/>
+                    <Show when={devices() && devices().length > 0} fallback={<p>Ei laitteita</p>}>
+                        <DeviceList
+                            devices={devices}
+                            deleteDevice={deleteDevice}
+                        />
+                    </Show>
 				</Suspense>
 			</div>
 		</ErrorBoundary>

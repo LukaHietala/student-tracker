@@ -14,7 +14,13 @@ function GroupsPage() {
 	const [groups, { refetch }] = createResource(
 		() => user() && user().id,
 		async () => {
-			return await groupService.listAll();
+            const groups = await groupService.listAll();
+            const sorted = groups.sort(function(a, b) {
+                return (a.createdAt > b.createdAt) ? -1 : ((a.createdAt < b.createdAt) ? 1 : 0);
+            })
+            console.log(sorted)
+
+            return sorted
 		},
 	);
 
@@ -72,7 +78,9 @@ function GroupsPage() {
 					/>
 				</Show>
 				<Suspense fallback={<p>Ladataan...</p>}>
-					<GroupList groups={groups} />
+                    <Show when={groups() && groups().length > 0} fallback={<p>Ei ryhmiä</p>}>
+                        <GroupList groups={groups} />
+                    </Show>
 				</Suspense>
 			</div>
 		</ErrorBoundary>

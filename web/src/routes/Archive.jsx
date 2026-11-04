@@ -17,7 +17,9 @@ function ArchivePage() {
 		<ErrorBoundary fallback={<p>Arkiston hakeminen epäonnistui</p>}>
 			<h3>Arkisto</h3>
 			<Suspense fallback={<p>Ladataan...</p>}>
-				<ArchiveList archive={archive} />
+                <Show when={archive() && archive().length > 0} fallback={<p>Arkisto on tyhjä</p>}>
+                    <ArchiveList archive={archive} />
+                </Show>
 			</Suspense>
 		</ErrorBoundary>
 	);
