@@ -6,6 +6,7 @@ import { useNavigate } from "@solidjs/router";
 import Scans from "../components/common/Scans";
 import ReadonlyCalendar from "../components/common/ReadonlyCalendar";
 import EditStudent from "../components/student/EditStudent";
+import { formatForReading, secondsToHuman } from "../scripts/utils.js"
 
 const days = ["Ma", "Ti", "Ke", "To", "Pe", "La", "Su"]
 
@@ -68,8 +69,8 @@ function StudentPage() {
                         <h4>Tilanne</h4>
                         <div class="block-col">
                             <span>Tila: {student().status === "IN" ? "Sisällä" : "Ulkona"}</span><br/>
-                            <span>Töitä tehty: {student().doneSeconds}</span><br/>
-                            <span>Töitä jäljellä: {student().remaining}</span>
+                            <span>Töitä tehty yhteensä: {secondsToHuman(student().doneSeconds)}</span><br/>
+                            <span>{formatForReading(student().remaining)}</span>
                         </div>
                         <h4>Työjärjestys</h4>
                         <div class="block-col">
@@ -87,6 +88,7 @@ function StudentPage() {
                         </div>
                         <h4>Muut tiedot</h4>
                         <div class="block-col">
+                            <span>Tauko per päivä: {student().breakTime} min</span>
                         </div>
                         <h4>Skannaus loki</h4>
                         <Scans id={student().id}/>

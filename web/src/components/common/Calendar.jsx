@@ -1,5 +1,6 @@
 import { setInput, getInput } from "@formisch/solid";
 import { createSignal, createEffect } from "solid-js";
+import holidays from "../../../../data/holidays.json";
 
 function Calendar(props) {
 	const [year, setYear] = createSignal(new Date().getFullYear());
@@ -36,6 +37,8 @@ function Calendar(props) {
 	createEffect(() => {
 		updateStats();
 	});
+    
+    const getDay = (day) => (day ? day.name : "");
 
 	return (
 		<div class="calendar">
@@ -127,7 +130,16 @@ function Calendar(props) {
 														});
 													}}
 												>
-													{i() * 7 + j() + 1 - startDay()}
+													<span>{i() * 7 + j() + 1 - startDay()}</span>
+                                                    <small>
+                                                        {getDay(
+                                                            holidays.find(
+                                                                (day) =>
+                                                                day.date ==
+                                                                    `${year()}-${pad(month())}-${pad(i() * 7 + j() + 1 - startDay())}`,
+                                                            ),
+                                                        )}
+                                                    </small>
 												</button>
 											</Show>
 										</td>

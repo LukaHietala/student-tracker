@@ -258,7 +258,7 @@ code {
 	padding: 15px;
 }
 
-.search-list {
+.scan-log {
 	display: flex;
 	flex-direction: column;
 	border: 1px solid var(--border);
@@ -269,17 +269,17 @@ code {
 	width: 100%;
 }
 
-.search-list-filter {
-	position: sticky;
-	top: 0;
-	padding: 10px 15px;
-	background-color: white;
+.scan-log-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 10px 15px;
+    align-items: center;
 	border-bottom: 1px solid var(--border);
 }
 
-.search-list-item {
+.scan-log-item {
 	padding: 10px 15px;
-	border-bottom: 1px solid var(--border);
 }
 
 .toast {
@@ -387,7 +387,7 @@ code {
 	display: block;
 	position: absolute;
 	bottom: 6px;
-	left: 12px;
+	left: 6px;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -413,7 +413,7 @@ code {
 .calendar-table {
 	border-collapse: collapse;
 	table-layout: fixed;
-	whitespace: nowrap;
+	white-space: nowrap;
 	width: 100%;
 }
 

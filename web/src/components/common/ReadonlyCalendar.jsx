@@ -1,10 +1,9 @@
-import { setInput, getInput } from "@formisch/solid";
-import { createSignal, createEffect, createResource } from "solid-js";
+import { createSignal, createEffect } from "solid-js";
 import holidays from "../../../../data/holidays.json";
 
 function ReadonlyCalendar(props) {
-    const schedule = props.schedule;
-    const excludedDays = props.excludedDays;
+    const schedule = () => props.schedule;
+    const excludedDays = () => props.excludedDays;
 
     const [year, setYear] = createSignal(new Date().getFullYear());
     const [month, setMonth] = createSignal(new Date().getMonth() + 1);
@@ -41,9 +40,7 @@ function ReadonlyCalendar(props) {
         updateStats();
     });
 
-    const pippelikikkelipeppu = (day) => (day ? day.name : "");
-
-    console.log(holidays);
+    const getDay = (day) => (day ? day.name : "");
 
     return (
         <div class="calendar">
@@ -104,8 +101,8 @@ function ReadonlyCalendar(props) {
                                                     classList={{
                                                         "calendar-box-button": true,
                                                         "calendar-active":
-                                                        schedule[j()] == null ||
-                                                            excludedDays.includes(
+                                                        schedule()[j()] == null ||
+                                                            excludedDays().includes(
                                                                 `${year()}-${month()}-${pad(i() * 7 + j() + 1 - startDay())}`,
                                                             )
                                                             ? true
@@ -114,7 +111,7 @@ function ReadonlyCalendar(props) {
                                                 >
                                                     <span>{i() * 7 + j() + 1 - startDay()}</span>
                                                     <small>
-                                                        {pippelikikkelipeppu(
+                                                        {getDay(
                                                             holidays.find(
                                                                 (day) =>
                                                                 day.date ==
