@@ -1,5 +1,4 @@
 import { createResource, createSignal, createEffect, onMount } from "solid-js";
-import { render } from "solid-js/web";
 import { scanService } from "../../services";
 import { useAuth } from "../../context/AuthContext.jsx";
 
@@ -36,16 +35,17 @@ function Scans(props) {
                                     Kokonäyttö
                                 </button>
                         </div>
-                        <Show when={scans().length == 0}>
+                        <Show when={scans().length > 0} fallback={
                             <div class="scan-log-item">
                                 <span>Ei skannauksia</span>
                             </div>
-                        </Show>
-                        <Timeline scans={scans()} fullscreen={fullscreen} setFullscreen={setFullscreen}/>
-                        <Show when={fullscreen()}>
-                             <div class="scan-log-item">
-                                <span>asdf</span>
-                            </div>
+                        }>
+                            <Timeline scans={scans()} fullscreen={fullscreen} setFullscreen={setFullscreen}/>
+                            <Show when={fullscreen()}>
+                                 <div class="scan-log-item">
+                                    <span>asdf</span>
+                                </div>
+                            </Show>
                         </Show>
                     </Show>
                 </Suspense>

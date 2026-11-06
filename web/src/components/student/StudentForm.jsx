@@ -1,0 +1,342 @@
+import { createForm, Field, FieldArray, Form, reset, setInput, getInput } from "@formisch/solid";
+import { createEffect } from "solid-js";
+import { studentSchema } from "./schema.js";
+import Calendar from "../common/Calendar";
+import { useWebSocket } from "../../context/WebsocketContext.jsx";
+
+function StudentForm(props) {
+	// Asiatonta
+	const student = props.student;
+	const cancel = () => props.cancel;
+	const title = props.title;
+
+	const handleSubmit = async (data) => {
+		await props.onSubmit(data);
+	};
+
+	const studentEditForm = createForm({
+		schema: studentSchema,
+	});
+
+	createEffect(() => {
+		if (student) {
+			reset(studentEditForm, {
+				initialInput: student(),
+			});
+		}
+	});
+
+	const ws = useWebSocket();
+	ws.addEventListener("message", (event) => {
+		const data = JSON.parse(event.data);
+
+		if (data.event !== "scan:new") {
+			return;
+		}
+
+		if (data.payload.groupId !== 0) {
+			return;
+		}
+
+		if (data.payload.uid) setInput(studentEditForm, { path: ["uid"], input: data.payload.uid });
+	});
+
+	const days = [
+		"Maanantai",
+		"Tiistai",
+		"Keskiviiko",
+		"Torstai",
+		"Perjantai",
+		"Launtai",
+		"Sunnuntai",
+	];
+
+	return (
+		<Form
+			of={studentEditForm}
+			onSubmit={handleSubmit}
+			class="form"
+		>
+			<div class="form-block">
+				<span>{title}</span>
+			</div>
+			<div class="form-block">
+				<span>Perustiedot</span>
+				<br />
+				<small>Opiskelijan perustiedot.</small>
+			</div>
+			<div class="form-block">
+				<Field
+					of={studentEditForm}
+					path={["name"]}
+				>
+					{(field) => (
+						<div>
+							<label for={field.props.name}>Nimi:</label>
+							<br />
+							<input
+								{...field.props}
+								id={field.props.name}
+								value={field.input}
+								type="text"
+								required
+							/>
+							{field.errors && <small class="form-error">{field.errors[0]}</small>}
+						</div>
+					)}
+				</Field>
+				<Field
+					of={studentEditForm}
+					path={["uid"]}
+				>
+					{(field) => (
+						<div>
+							<label for={field.props.name}>Kortin UID:</label>
+							<br />
+							<input
+								{...field.props}
+								id={field.props.name}
+								value={field.input}
+								type="text"
+								required
+								placeholder="Skannaa tyhjä kortti"
+								disabled
+							/>
+							{field.errors && <small class="form-error">{field.errors[0]}</small>}
+						</div>
+					)}
+				</Field>
+				<Field
+					of={studentEditForm}
+					path={["status"]}
+				>
+					{(field) => (
+						<div>
+							<label for={field.props.name}>Tila:</label>
+							<br />
+							<select {...field.props}>
+								<For
+									each={[
+										{ label: "Sisällä", value: "IN" },
+										{ label: "Ulkona", value: "OUT" },
+									]}
+								>
+									{({ label, value }) => (
+										<option
+											value={value}
+											selected={field.input === value}
+										>
+											{label}
+										</option>
+									)}
+								</For>
+							</select>
+							{field.errors && <small class="form-error">{field.errors[0]}</small>}
+						</div>
+					)}
+				</Field>
+			</div>
+			<div class="form-block">
+				<span>Jakso</span>
+				<br />
+				<small>Oppilaan työjakso.</small>
+			</div>
+			<div class="form-block">
+				<Field
+					of={studentEditForm}
+					path={["startDate"]}
+				>
+					{(field) => (
+						<div>
+							<label for={field.props.name}>Aloituspäivä:</label>
+							<br />
+							<input
+								{...field.props}
+								id={field.props.name}
+								value={field.input}
+								type="date"
+								required
+							/>
+							{field.errors && <small class="form-error">{field.errors[0]}</small>}
+						</div>
+					)}
+				</Field>
+				<Field
+					of={studentEditForm}
+					path={["endDate"]}
+				>
+					{(field) => (
+						<div>
+							<label for={field.props.name}>Lopetuspäivä:</label>
+							<br />
+							<input
+								{...field.props}
+								id={field.props.name}
+								value={field.input}
+								type="date"
+								required
+							/>
+							{field.errors && <small class="form-error">{field.errors[0]}</small>}
+						</div>
+					)}
+				</Field>
+			</div>
+			<div class="form-block">
+				<span>Aikataulu</span>
+				<br />
+				<small>Aikataulu määrittää työajat viikonpäivä kohtaisesti.</small>
+			</div>
+			<div class="form-block schedule">
+				<FieldArray
+					of={studentEditForm}
+					path={["schedule"]}
+				>
+					{(fieldArray) => (
+						<>
+							{fieldArray.items.map((item, index) => (
+								<Show when={item}>
+									<div
+										key={index}
+										class="schedule-item"
+									>
+										<span class="small">{days[index]}</span>
+										<Show
+											when={
+												getInput(studentEditForm, {
+													path: ["schedule", index],
+												}) != null
+											}
+											fallback={<div>Vapaa</div>}
+										>
+											<Field
+												of={studentEditForm}
+												path={["schedule", index, "start"]}
+											>
+												{(field) => (
+													<>
+														<input
+															{...field.props}
+															value={field.input}
+															type="time"
+														/>
+														{field.errors && (
+															<div>{field.errors[0]}</div>
+														)}
+													</>
+												)}
+											</Field>
+
+											<Field
+												of={studentEditForm}
+												path={["schedule", index, "end"]}
+											>
+												{(field) => (
+													<>
+														<input
+															{...field.props}
+															value={field.input}
+															type="time"
+														/>
+														{field.errors && (
+															<div>{field.errors[0]}</div>
+														)}
+													</>
+												)}
+											</Field>
+										</Show>
+										<input
+											type="checkbox"
+											checked={
+												getInput(studentEditForm, {
+													path: ["schedule", index],
+												}) != null
+											}
+											onClick={(e) => {
+												if (e.target.checked) {
+													setInput(studentEditForm, {
+														path: ["schedule", index],
+														input: {
+															start: "08:00:00",
+															end: "16:00:00",
+														},
+													});
+												} else {
+													setInput(studentEditForm, {
+														path: ["schedule", index],
+														input: null,
+													});
+												}
+											}}
+										/>
+									</div>
+								</Show>
+							))}
+							{fieldArray.errors && <div>{fieldArray.errors[0]}</div>}
+						</>
+					)}
+				</FieldArray>
+			</div>
+			<div class="form-block">
+				<span>Kalenteri</span>
+				<br />
+				<small>
+					Voit merkata päiviä vapaaksi. Esimerksi lomapäivät tai itsenäinen opiskelu.
+				</small>
+			</div>
+			<div
+				class="form-block"
+				style="padding:0;"
+			>
+				<Show when={getInput(studentEditForm)}>
+					<Calendar studentForm={studentEditForm} />
+				</Show>
+			</div>
+			<div class="form-block">
+				<span>Muuta</span>
+				<br />
+				<small>Lisätietoja oppilaasta.</small>
+			</div>
+			<div class="form-block">
+				<Field
+					of={studentEditForm}
+					path={["breakTime"]}
+				>
+					{(field) => (
+						<div>
+							<label for={field.props.name}>Tauko per päivä</label>
+							<br />
+							<input
+								{...field.props}
+								id={field.props.name}
+								value={field.input}
+								type="number"
+								required
+							/>
+							<small>min</small>
+							{field.errors && <small class="form-error">{field.errors[0]}</small>}
+						</div>
+					)}
+				</Field>
+			</div>
+			<div class="form-block">
+				<div style="display: inline-flex; gap: 4px;">
+					<button
+						class="btn-secondary"
+						type="button"
+						onClick={() => cancel()}
+					>
+						Peruuta
+					</button>
+					<button
+						class="btn-primary"
+						type="submit"
+					>
+						Tallenna
+					</button>
+				</div>
+			</div>
+		</Form>
+	);
+}
+
+export default StudentForm;
